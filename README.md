@@ -29,7 +29,7 @@ public class EmojiTestInput {
 
     private String getFace() {
         return (arms == null ? "" : arms.substring(0, 1))
-                + '(' + eye + snoot + eye + ')'
+                + '(' + eye + snoot + eye + ')' // chars cannot be null
                 + (arms == null ? "" : arms.substring(1, 2));
     }
 
@@ -54,21 +54,27 @@ Running this class yields:
 119 faces generated with independent 2-tuples or properties
 ```
 
-Of the total possible combinations (11 x 9 x 5 = 495), this is a smaller subset of 119 faces where for each trait-pair (e.g. eyes and mouth) each combination appears at least once.
-As test-inputs, using such subsets instead of all combinations reduces test-time while usually detecting the same bugs as the full set.
+Of the total possible combinations (11 x 9 x 5 = 495), this is a smaller subset of 119 faces where for each trait-pair (e.g. eyes and mouth) each combination appears at least once. (TODO: Show how number can be further reduced)
+As test-inputs, using such subsets instead of all combinations reduces test-time while detecting most bugs that would be found by testing all combinations (some studies suggest 75% of bugs).
 
 This shows only a small part of the possibilities to define combinations, for boundary-value testing conditions and failure values are very powerful.
 
 ## Motivation
 
 When automating tests for system with complex inputs, a challenge is maintaining a large set of test input combinations, another challenge is to keep the duration of running all tests low.
-Using Beanfiller-tcases, java developers can model any number of testcases in a simple java bean and have instances automaticall generated to run tests, with the benefit of pairwise testing reducing the total number of tests.
+Using Beanfiller-tcases, java developers can model any number of testcases in a simple java bean and have instances automatically generated to run tests, with the benefit of pairwise testing reducing the total number of tests.
 
 This project uses [Tcases](https://github.com/Cornutum/tcases), a tool for combinatorial testing.
 Tcases is intended as a standalone CLI tool to maintain a set of testcase xml-files over time, possibly maintaining also a set of generated+modified Test sources (in any language) containing expected values for each generated testcase (a.k.a Oracle).
 
 In contract to Tcases, Beanfiller-Tcases aims to be used as a java library without necessarily handling XML or generated testing code.
 A tester can easily generate a small subset of combinations of test variables, and thus have an easily readable and maintainable testing codebase.
+
+## In-depth example
+
+The initial Emoji example is just an introduction to how to use the library to manage combinatorial code problems.
+
+TODO: Add an actual test exampe here with conditions and failures.
 
 ## How to use
 
@@ -127,12 +133,26 @@ Custom Mappers can extend this to other types.
 
 ### Why not annotate methods instead of Beans?
 
-Most commonly testcases will contain meta-information in addition to raw values, a bean is required to capture this data.
+Since one test seems to test one function, it might be useful to annotate a function, like
 
-### How can test outputs be derived without calling the system under test?
+```java
+    public void foo(@Values(@Value(""), @Value("x"), ...) String a,
+                    @Values(@Value(""), @Value("x"), ...) String b,
+                    @Values(@Value(""), @Value("x"), ...) String c, ...)
+```
 
-Most generally they cannot, and you have to provide them by hand.
-But in many cases, since the testcase knows moe than the input values, output values can be generated.
+Then foo could be directly called by the framework.
+However this is usually not practical, because a testcase definition needs to define and contain more metadata, and often the testcase values must be transformed into actual function inputs.
+
+
+### How to handle expected test outputs?
+
+In Tcases, the developer generally has to define the expected test output *after* generating combinations.
+This can be done in a separate file, or in generated JUnit code.
+
+Managing additional files mapping inputs to expected test outputs is tedious (to write and to maintain later on).
+
+But in some cases, since the testcase knows moe than the input values, output values can be derived from the test definitions.
 In particular, the test case has knowledge about:
 
 1. The intended semantics of a value
