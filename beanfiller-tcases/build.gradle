@@ -1,0 +1,151 @@
+JavaSetup.configure(project)
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+apply plugin: 'com.jfrog.bintray' // for bintray
+apply plugin: 'maven-publish' // for bintray
+apply plugin: 'maven' // for oss
+apply plugin: 'signing' // for oss
+
+
+dependencies {
+    compileOnly Libraries.jsr305
+    // TODO: Allow using beanfiller without referencing tcases
+    compile Libraries.tcases
+    // For StringUtils
+    compile Libraries.commons_lang3
+    // For IteratorUtils
+    compile Libraries.commons_coll4
+    compile Libraries.slf4j_api
+
+    testCompileOnly Libraries.jsr305
+    testCompile LibraryGroups.unit_test
+    testRuntime Libraries.logback
+}
+
+task sourcesJar( type: Jar ) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+
+task javadocJar (type: Jar, dependsOn: javadoc) { // (1)
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+// ********* Note to myself: Release steps
+// run gradle clean check
+// push to develop
+// wait for travis to be happy
+// check README.md and CHANGELOG
+// remove -SNAPSHOT in gradle.properties from version (in README too)
+// ./gradlew clean assemble uploadArchives generatePomFileForMavenJavaPublication bintrayUpload
+// git tag
+// push to master with --tags
+// Then see instructions below
+// Finally bump to next version + -SNAPSHOT also in README and push to develop (not master!)
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Beanfiller-tcases',
+                'Implementation-Version': version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version'),
+                'Built-Gradle': gradle.gradleVersion
+    }
+}
+
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+/************ Maven central
+ * go to
+ * https://oss.sonatype.org/#stagingRepositories
+ * check all is good. If so, find the repo, select, close, wait until closed, then release
+ *
+ * Also see:
+ * https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
+ * http://central.sonatype.org/pages/releasing-the-deployment.html
+ * http://yennicktrevels.com/blog/2013/10/11/automated-gradle-project-deployment-to-sonatype-oss-repository/
+ */
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(
+                        // from ~/.gradle/gradle.properties
+                        userName: (project.hasProperty( 'sonatypeUsername' ) ? project.getProperty( 'sonatypeUsername' ) : null),
+                        password: (project.hasProperty( 'sonatypePassword' ) ? project.getProperty( 'sonatypePassword' ) : null))
+            }
+            pom.project {
+                name project.name
+                packaging 'jar'
+                description project.description
+                url 'https://github.com/beanfiller/beanfiller-tcases'
+                scm {
+                    url 'https://github.com/beanfiller/beanfiller-tcases'
+                    connection 'scm:git:git://beanfiller/beanfiller-tcases.git'
+                    developerConnection 'scm:git:ssh:git@github.com:beanfiller/beanfiller-tcases.git'
+                }
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/license/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'tkruse'
+                        name 'Thibault Kruse'
+                        email project.hasProperty( 'email' ) ? project.getProperty( 'email' ) : null
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}
+
+/********* Bintray
+ * go to https://bintray.com/beanfiller/maven/beanfiller-tcases and hit publish
+ *
+ * also see:  https://github.com/bintray/gradle-bintray-plugin
+ */
+bintray {
+    // from ~/.gradle/gradle.properties
+    user = project.hasProperty( 'bintrayUser' ) ? project.getProperty( 'bintrayUser' ) : null
+    key = project.hasProperty( 'bintrayKey' ) ? project.getProperty( 'bintrayKey' ) : null
+    publications = ['mavenJava']
+
+    pkg {
+        repo = 'maven'
+        name = 'beanfiller-tcases'
+        userOrg = 'beanfiller'
+        desc = 'An annotation and reflections based java-library to fill Java beans with values according to combinatorial testing principles.'
+        licenses = ['Apache-2.0']
+        labels = ['java', 'testing']
+        vcsUrl = 'https://github.com/beanfiller/beanfiller-tcases'
+    }
+
+    dryRun = true
+}

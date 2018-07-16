@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE FindBugsFilter>
+<!-- Exclude filter -->
+<FindBugsFilter xmlns="http://findbugs.sourceforge.net/filter/3.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://findbugs.sourceforge.net/filter/3.0.0 https://raw.githubusercontent.com/findbugsproject/findbugs/master/findbugs/etc/findbugsfilter.xsd">
+    <!-- Match all XYZ violations.
+        Dm Internationalization
+        EI expose internals
+        EI2 storing mutables
+        SIC static inner class
+        BC Bad Cast
+        UrF Unread Field
+        HRS Header request splitting
+        EQ_UNUSUAL unusual Equals method
+        DM_DEFAULT_ENCODING breaks platform portability (running server on windows)
+        RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE happens with lombok sometimes
+        URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD happens for junit rules
+        ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD used once for restassured :-(
+        UI_INHERITANCE_UNSAFE_GETRESOURCE used in tests
+        UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR = problems with lombok for collection fields
+        -->
+    <Match>
+        <Bug pattern="" code=""/>
+    </Match>
+
+	<Match>
+		<Class name="~.*MapperImpl" />
+	</Match>
+
+
+    <!-- Ignore more bug types in JUnit Tests -->
+    <Match>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC,MS_PKGPROTECT,URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD,NP_NONNULL_PARAM_VIOLATION,SIC_INNER_SHOULD_BE_STATIC_ANON,UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD" />
+        <Class name="~.*\.*Test([\$a-zA-Z0-9])*" />
+    </Match>
+
+</FindBugsFilter>

@@ -1,0 +1,282 @@
+<?xml version="1.0"?>
+<TestCases system="fooSystem">
+    <Function name="Find">
+        <Has name="description" value="The find function"/>
+        <TestCase id="0">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="ONE"/>
+                <Var name="pattern.quoted" value="YES"/>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="NONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="NONE"/>
+                <Var name="file.contents.patternsInLine" value="ONE"/>
+            </Input>
+        </TestCase>
+        <TestCase id="1">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="ONE"/>
+                <Var name="pattern.quoted" value="NO"/>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="ONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="ONE"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+        <TestCase id="2">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="ONE"/>
+                <Var name="pattern.quoted" value="YES"/>
+                <Var name="pattern.blanks" value="ONE"/>
+                <Var name="pattern.embeddedQuotes" value="MANY"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="MANY"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+        <TestCase id="3">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="MANY"/>
+                <Var name="pattern.quoted" value="YES"/>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="NONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="NONE"/>
+                <Var name="file.contents.patternsInLine" value="ONE"/>
+            </Input>
+        </TestCase>
+        <TestCase id="4">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="MANY"/>
+                <Var name="pattern.quoted" value="NO"/>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="MANY"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="ONE"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+        <TestCase id="5">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="MANY"/>
+                <Var name="pattern.quoted" value="YES"/>
+                <Var name="pattern.blanks" value="MANY"/>
+                <Var name="pattern.embeddedQuotes" value="ONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="MANY"/>
+                <Var name="file.contents.patternsInLine" value="ONE"/>
+            </Input>
+        </TestCase>
+        <TestCase id="6">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="ONE"/>
+                <Var name="pattern.quoted" value="YES"/>
+                <Var name="pattern.blanks" value="ONE"/>
+                <Var name="pattern.embeddedQuotes" value="NONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="ONE"/>
+                <Var name="file.contents.patternsInLine" value="ONE"/>
+            </Input>
+        </TestCase>
+        <TestCase id="7">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="ONE"/>
+                <Var name="pattern.quoted" value="NO"/>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="NONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="NONE"/>
+                <Var name="file.contents.patternsInLine" value="ONE"/>
+            </Input>
+        </TestCase>
+        <TestCase id="8">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="ONE"/>
+                <Var name="pattern.quoted" value="NO"/>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="ONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="MANY"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+        <TestCase id="9">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="ONE"/>
+                <Var name="pattern.quoted" value="YES"/>
+                <Var name="pattern.blanks" value="ONE"/>
+                <Var name="pattern.embeddedQuotes" value="ONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="NONE"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+        <TestCase id="10">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="MANY"/>
+                <Var name="pattern.quoted" value="YES"/>
+                <Var name="pattern.blanks" value="MANY"/>
+                <Var name="pattern.embeddedQuotes" value="NONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="NONE"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+        <TestCase id="11">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="MANY"/>
+                <Var name="pattern.quoted" value="YES"/>
+                <Var name="pattern.blanks" value="MANY"/>
+                <Var name="pattern.embeddedQuotes" value="MANY"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="ONE"/>
+                <Var name="file.contents.patternsInLine" value="ONE"/>
+            </Input>
+        </TestCase>
+        <TestCase id="12">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="MANY"/>
+                <Var name="pattern.quoted" value="NO"/>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="NONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="MANY"/>
+                <Var name="file.contents.patternsInLine" value="ONE"/>
+            </Input>
+        </TestCase>
+        <TestCase id="13">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="ONE"/>
+                <Var name="pattern.quoted" value="YES"/>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="MANY"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="NONE"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+        <TestCase id="14" failure="true">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="NONE" failure="true">
+                    <Has name="failure" value="Pattern empty"/>
+                </Var>
+                <Var name="pattern.quoted" value="NA"/>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="ONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="ONE"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+        <TestCase id="15" failure="true">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="MANY"/>
+                <Var name="pattern.quoted" value="UNTERMINATED" failure="true">
+                    <Has name="failure" value="QuoteMismatch"/>
+                </Var>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="ONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="ONE"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+        <TestCase id="16" failure="true">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="MANY"/>
+                <Var name="pattern.quoted" value="NO"/>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="ONE"/>
+                <Var name="filenameDefined" value="false" failure="true">
+                    <Has name="failure" value="No Filename"/>
+                </Var>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="ONE"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+        <TestCase id="17" failure="true">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="NA"/>
+                <Var name="pattern.quoted" value="NA"/>
+                <Var name="pattern.blanks" value="NA"/>
+                <Var name="pattern.embeddedQuotes" value="NA"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="false" failure="true">
+                    <Has name="failure" value="FileNotFound"/>
+                </Var>
+                <Var name="file.contents.linesLongerThanPattern" value="true"/>
+                <Var name="file.contents.patterns" value="ONE"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+        <TestCase id="18" failure="true">
+            <Has name="description" value="The find function"/>
+            <Input type="arg">
+                <Var name="pattern.size" value="MANY"/>
+                <Var name="pattern.quoted" value="NO"/>
+                <Var name="pattern.blanks" value="NONE"/>
+                <Var name="pattern.embeddedQuotes" value="ONE"/>
+                <Var name="filenameDefined" value="true"/>
+                <Var name="file.exists" value="true"/>
+                <Var name="file.contents.linesLongerThanPattern" value="false" failure="true">
+                    <Has name="failure" value="Pattern too long"/>
+                </Var>
+                <Var name="file.contents.patterns" value="ONE"/>
+                <Var name="file.contents.patternsInLine" value="MANY"/>
+            </Input>
+        </TestCase>
+    </Function>
+</TestCases>

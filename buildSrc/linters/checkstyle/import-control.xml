@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<!DOCTYPE import-control PUBLIC
+        "-//Puppy Crawl//DTD Import Control 1.1//EN"
+        "http://www.puppycrawl.com/dtds/import_control_1_1.dtd">
+<import-control pkg=" io.github.beanfiller.annotation">
+    <allow pkg="java.io"/>
+    <allow pkg="java.nio"/>
+    <allow pkg="java.util"/>
+    <allow pkg="java.util.stream"/>
+    <allow pkg="java.lang"/>
+    <allow pkg="java.security"/>
+    <allow pkg="java.net"/>
+    <allow pkg="java.text"/>
+    <allow pkg="java.time"/>
+    <allow pkg="java.math"/>
+    <!-- Nonnull and CheckForNull, do not use Nullable on members, it has no effect in Spotbugs -->
+    <allow class="javax.annotation.Nonnull"/>
+    <allow class="javax.annotation.Nullable"/>
+    <allow class="javax.annotation.CheckForNull"/>
+    <allow class="javax.annotation.CheckReturnValue"/>
+    <allow class="javax.annotation.PostConstruct"/>
+    <allow class="javax.annotation.PreDestroy"/>
+    <!-- commons -->
+    <allow class="com.google.common.annotations.VisibleForTesting"/>
+    <allow pkg="org.slf4j"/>
+    <allow pkg="org.apache.commons.lang3"/>
+    <allow pkg="org.apache.commons.collections4"/>
+
+    <!-- Classes considered public API -->
+    <allow class="org.cornutum.tcases.Tcases"/>
+    <allow class="org.cornutum.tcases.generator.GeneratorOptions"/>
+    <allow class="org.cornutum.tcases.SystemInputDef"/>
+    <allow class="org.cornutum.tcases.SystemTestDef"/>
+    <allow class="org.cornutum.tcases.FunctionInputDef"/>
+    <allow class="org.cornutum.tcases.FunctionTestDef"/>
+    <allow class="org.cornutum.tcases.Annotated"/>
+    <allow class="org.cornutum.tcases.VarBinding"/>
+    <allow class="org.cornutum.tcases.VarValueDef"/>
+    <allow class="org.cornutum.tcases.IVarDef"/>
+    <allow class="org.cornutum.tcases.VarSet"/>
+    <allow class="org.cornutum.tcases.VarDef"/>
+    <allow class="org.cornutum.tcases.conditions.ICondition"/>
+    <allow class="org.cornutum.tcases.conditions.AllOf"/>
+    <allow class="org.cornutum.tcases.conditions.AnyOf"/>
+    <allow class="org.cornutum.tcases.conditions.Not"/>
+    <allow class="org.cornutum.tcases.conditions.ContainsAll"/>
+    <allow class="org.cornutum.tcases.conditions.ContainsAny"/>
+    <allow class="org.cornutum.tcases.conditions.ConditionSet"/>
+    <allow class="org.cornutum.tcases.io.SystemTestDocReader"/>
+    <allow class="org.cornutum.tcases.TestCase"/>
+    <allow class="org.cornutum.tcases.generator.TupleGenerator"/>
+    <allow class="org.cornutum.tcases.generator.TupleCombiner"/>
+    <allow class="org.cornutum.tcases.generator.ITestCaseGenerator"/>
+    <allow class="org.cornutum.tcases.generator.GeneratorSet"/>
+    <allow class="org.cornutum.tcases.generator.IGeneratorSet"/>
+
+    <subpackage name="annotations">
+    </subpackage>
+
+    <subpackage name="creator">
+        <allow pkg="io.github.beanfiller.annotation.generator"/>
+        <allow pkg="io.github.beanfiller.annotation.reader"/>
+        <allow class="org.xml.sax.SAXParseException"/>
+        <allow pkg="io.github.beanfiller.annotation.writer"/>
+    </subpackage>
+
+    <subpackage name="generator">
+    </subpackage>
+
+    <subpackage name="internal">
+        <allow pkg="io.github.beanfiller.annotation.builders"/>
+        <subpackage name="reader">
+            <allow pkg="io.github.beanfiller.annotation.annotations"/>
+            <allow pkg="io.github.beanfiller.annotation.internal.reader"/>
+            <allow class="io.github.beanfiller.annotation.reader.VarDefReader"/>
+        </subpackage>
+    </subpackage>
+
+    <subpackage name="reader">
+        <allow pkg="io.github.beanfiller.annotation.builders"/>
+        <allow pkg="io.github.beanfiller.annotation.reader"/>
+        <allow pkg="io.github.beanfiller.annotation.internal.reader"/>
+        <allow pkg="io.github.beanfiller.annotation.annotations"/>
+    </subpackage>
+
+    <subpackage name="writer">
+        <allow class="org.cornutum.tcases.io.SystemTestDocWriter"/>
+    </subpackage>
+
+</import-control>

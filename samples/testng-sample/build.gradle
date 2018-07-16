@@ -1,0 +1,18 @@
+apply plugin: 'java'
+
+test {
+    useTestNG()
+}
+
+dependencies {
+
+    testCompile project(':beanfiller-tcases')
+    // for real-world projects
+    // testCompile 'io.github.beanfiller:tcases-annotation:[latestVersion]'
+
+    // only for TestNg example
+    testCompile "org.testng:testng:${Versions.testng}"
+
+    // optional
+    testRuntime "ch.qos.logback:logback-classic:${Versions.logback}"
+}

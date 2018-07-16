@@ -1,0 +1,290 @@
+<project 
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+
+  <groupId>io.github.beanfiller</groupId>
+  <artifactId>tcases</artifactId>
+  <packaging>pom</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <name>Beanfiller tcases</name>
+  <description>Generates Java beans based on annotations and combinatioral testing principles</description>
+  <url>https://github.com/beanfiller/beanfiller-tcases</url>
+
+  <developers>
+    <developer>
+      <name>Thibault Kruse</name>
+      <email>tcases@beanfiller.org</email>
+      <organization>The Beanfiller Project</organization>
+      <organizationUrl>http://www.beanfillers.org</organizationUrl>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>The Apache License</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <organization>
+    <name>The Beanfiller Project</name>
+    <url>http://www.beanfillers.org/</url>
+  </organization>
+
+  <scm>
+    <connection>scm:git:https://github.com/Cornutum/tcases</connection>
+    <developerConnection>scm:git:https://github.com/Cornutum/tcases</developerConnection>
+    <url>https://github.com/Cornutum/tcases</url>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/beanfiller/beanfiller-tcases/issues</url>
+  </issueManagement>
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jdk.version>1.8</jdk.version>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
+          <configuration>
+            <encoding>UTF-8</encoding>
+            <source>${jdk.version}</source>
+            <target>${jdk.version}</target>
+            <showDeprecation>true</showDeprecation>
+            <showWarnings>true</showWarnings>
+            <compilerArgument>-Xlint:all</compilerArgument>
+            <compilerArgument>-Xlint:-processing</compilerArgument>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>2.1</version>
+          <executions>
+            <execution>
+              <id>default-cli</id>
+              <goals>
+                <goal>set</goal>
+              </goals>
+              <configuration>
+               <generateBackupPoms>false</generateBackupPoms>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.5</version>
+          <configuration>
+            <mavenExecutorId>forked-path</mavenExecutorId>
+            <useReleaseProfile>false</useReleaseProfile>
+            <arguments>${arguments} -Psonatype-oss-release</arguments>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>javadoc</classifier>
+              <doclint>none</doclint>
+            </configuration>
+          </execution>
+        </executions>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-source-plugin</artifactId>
+      <version>3.0.1</version>
+      <executions>
+        <execution>
+          <id>attach-sources</id>
+          <goals>
+            <goal>jar</goal>
+          </goals>
+          <configuration>
+            <classifier>sources</classifier>
+          </configuration>
+        </execution>
+      </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.4.1</version>
+        <executions>
+          <execution>
+            <id>enforce-versions</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <dependencyConvergence/>
+                <reactorModuleConvergence/>
+                <bannedDependencies>
+                </bannedDependencies>
+                <requireReleaseDeps>
+                  <onlyWhenRelease>true</onlyWhenRelease>
+                </requireReleaseDeps>
+                <requireUpperBoundDeps/>
+                <requireMavenVersion>
+                  <version>3.3.0</version>
+                </requireMavenVersion>
+                <requireJavaVersion>
+                  <version>1.8</version>
+                </requireJavaVersion>
+                <requireSameVersions>
+                </requireSameVersions>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.basepom.maven</groupId>
+        <artifactId>duplicate-finder-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <id>default</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <printEqualFiles>false</printEqualFiles>
+          <failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
+          <failBuildInCaseOfEqualContentConflict>false</failBuildInCaseOfEqualContentConflict>
+          <failBuildInCaseOfConflict>false</failBuildInCaseOfConflict>
+          <checkCompileClasspath>true</checkCompileClasspath>
+          <checkRuntimeClasspath>true</checkRuntimeClasspath>
+          <checkTestClasspath>true</checkTestClasspath>
+          <skip>false</skip>
+          <quiet>false</quiet>
+          <preferLocal>true</preferLocal>
+          <useResultFile>true</useResultFile>
+          <resultFileMinClasspathCount>2</resultFileMinClasspathCount>
+          <resultFile>${project.build.directory}/duplicate-finder-result.xml</resultFile>
+
+          <includeBootClasspath>false</includeBootClasspath>
+          <bootClasspathProperty>sun.boot.class.path</bootClasspathProperty>
+          <includePomProjects>true</includePomProjects>
+          <useDefaultResourceIgnoreList>true</useDefaultResourceIgnoreList>
+          <ignoredResourcePatterns>
+            <ignoredResourcePattern>about\.html</ignoredResourcePattern>
+          </ignoredResourcePatterns>
+          <ignoredDependencies>
+          </ignoredDependencies>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <useAgent>false</useAgent>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>          
+        </plugins>
+      </build>      
+    </profile>
+  </profiles>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.3.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-collections4</artifactId>
+        <version>4.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.1.1</version>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
+  <modules>
+    <module>beanfiller-tcases</module>
+    <module>samples</module>
+    <module>samples/find-sample</module>
+    <module>samples/testng-sample</module>
+  </modules>
+
+</project>

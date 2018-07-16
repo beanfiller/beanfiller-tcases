@@ -1,0 +1,41 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        // these are globally visible, but plugins still need apply plugin ... to be enabled
+        classpath "gradle.plugin.com.github.spotbugs:gradlePlugin:${ToolVersions.spotbugsPlugin}"
+        classpath "com.palantir:jacoco-coverage:${ToolVersions.jacocoPlugin}"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+    }
+}
+
+plugins {
+    id "idea"
+    id "eclipse"
+    id "com.github.ben-manes.versions" version '0.20.0'
+}
+
+
+allprojects {
+
+    group = 'io.github.beanfiller'
+    version = project.projectVersion // taken from gradle.properties
+
+    repositories {
+        jcenter()
+        maven {
+            url 'https://jitpack.io'
+        }
+    }
+}
+
+subprojects {
+    // task to show all project dependencies
+    task allDeps(type: DependencyReportTask) {}
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.7'
+}
