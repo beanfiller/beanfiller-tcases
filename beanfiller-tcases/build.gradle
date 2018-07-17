@@ -154,10 +154,10 @@ bintray {
         vcsUrl = 'https://github.com/beanfiller/beanfiller-tcases'
 
         version {
-            name = "0.0.1"
-            desc = 'beanfiller-tcases 0.0.1 final'
+            name = "0.0.2"
+            desc = 'beanfiller-tcases 0.0.2 final'
             released  = new Date()
-            vcsTag = 'v0.0.1'
+            vcsTag = 'v0.0.2'
         }
     }
 

@@ -7,13 +7,13 @@
     <parent>
         <groupId>io.github.beanfiller</groupId>
         <artifactId>tcases</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
 
     <name>Samples</name>
     <artifactId>samples</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
