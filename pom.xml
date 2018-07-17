@@ -13,7 +13,7 @@
   <groupId>io.github.beanfiller</groupId>
   <artifactId>tcases</artifactId>
   <packaging>pom</packaging>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
 
   <name>Beanfiller tcases</name>
   <description>Generates Java beans based on annotations and combinatioral testing principles</description>

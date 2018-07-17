@@ -67,28 +67,28 @@ private static void configurePMD(Project project) {
         apply plugin: 'pmd'
 
         task('displayPmdReport', {
-            project.with() {
-                setGroup 'check'
-                setDescription 'parse the result of pmd and display in command line'
-                // show errors on command line to raise awareness
-                doLast {
-                    def parser = new XmlSlurper(false, false)
-                    parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-                    parser.setFeature("http://xml.org/sax/features/namespaces", false)
+            setGroup 'check'
+            setDescription 'parse the result of pmd and display in command line'
 
-                    File pmdFile = file("${project.buildDir}/reports/pmd/main.xml")
-                    if (pmdFile.exists()) {
-                        def pmdXml = parser.parse(pmdFile)
-                        pmdXml.file.each({ fileNode ->
-                            println("PMD of $project.name:" + fileNode.@name.text() + ':')
-                            fileNode.violation.each({ violationNode ->
-                                println("  ${violationNode.@beginline}-${violationNode.@endline}  " + violationNode.text().trim())
-                            })
+            // show errors on command line to raise awareness
+            doLast {
+                def parser = new XmlSlurper(false, false)
+                parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+                parser.setFeature("http://xml.org/sax/features/namespaces", false)
+
+                File pmdFile = file("${project.buildDir}/reports/pmd/main.xml")
+                if (pmdFile.exists()) {
+                    def pmdXml = parser.parse(pmdFile)
+                    pmdXml.file.each({ fileNode ->
+                        println("PMD of $project.name:" + fileNode.@name.text() + ':')
+                        fileNode.violation.each({ violationNode ->
+                            println("  ${violationNode.@beginline}-${violationNode.@endline}  " + violationNode.text().trim())
                         })
-                    }
-
+                    })
                 }
+
             }
+
         })
 
         pmdMain.mustRunAfter(test)

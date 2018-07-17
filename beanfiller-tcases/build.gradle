@@ -39,12 +39,14 @@ artifacts {
 }
 
 // ********* Note to myself: Release steps
+// Prerequisites: ~/.gradle/gradle.properties contains bintrayUser, bintrayKey, sonatypeUsername..., signing.keyId...
+//
 // run gradle clean check
 // push to develop
 // wait for travis to be happy
 // check README.md and CHANGELOG
 // remove -SNAPSHOT in gradle.properties from version (in README too)
-// ./gradlew clean assemble uploadArchives generatePomFileForMavenJavaPublication bintrayUpload
+// in beanfiller-tcases, ../gradlew clean assemble uploadArchives generatePomFileForMavenJavaPublication bintrayUpload
 // git tag
 // push to master with --tags
 // Then see instructions below
@@ -61,7 +63,9 @@ jar {
     }
 }
 
+
 signing {
+    // needs gpg set up in ~/.gnupg, and info filled in .gradle/gradle.properties
     required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
@@ -122,30 +126,40 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
+            groupId 'io.github.beanfiller'
+            artifactId 'beanfiller-tcases'
         }
     }
 }
 
 /********* Bintray
- * go to https://bintray.com/beanfiller/maven/beanfiller-tcases and hit publish
+ * go to https://bintray.com/beanfiller/beanfiller-tcases/beanfiller-tcases and hit publish
  *
  * also see:  https://github.com/bintray/gradle-bintray-plugin
  */
 bintray {
     // from ~/.gradle/gradle.properties
     user = project.hasProperty( 'bintrayUser' ) ? project.getProperty( 'bintrayUser' ) : null
+    // API key registered on bintray (not password)
     key = project.hasProperty( 'bintrayKey' ) ? project.getProperty( 'bintrayKey' ) : null
     publications = ['mavenJava']
 
     pkg {
-        repo = 'maven'
-        name = 'beanfiller-tcases'
+        repo = 'beanfiller-tcases' // bintray repo name
+        name = 'beanfiller-tcases' // bintray package name
         userOrg = 'beanfiller'
         desc = 'An annotation and reflections based java-library to fill Java beans with values according to combinatorial testing principles.'
         licenses = ['Apache-2.0']
         labels = ['java', 'testing']
         vcsUrl = 'https://github.com/beanfiller/beanfiller-tcases'
+
+        version {
+            name = "0.0.1"
+            desc = 'beanfiller-tcases 0.0.1 final'
+            released  = new Date()
+            vcsTag = 'v0.0.1'
+        }
     }
 
-    dryRun = true
+    // dryRun = true
 }
