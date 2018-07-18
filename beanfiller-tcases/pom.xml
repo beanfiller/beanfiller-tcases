@@ -15,7 +15,7 @@
 
   <name>Beanfiller Tcases Annotations</name>
   <description>Generates test cases from system input space models</description>
-  <url>https://github.com/Cornutum/tcases</url>
+  <url>https://github.com/beanfiller/beanfiller-tcases</url>
 
 
   <properties>
@@ -51,7 +51,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>2.19.0</version>
+      <version>2.21.0</version>
       <scope>test</scope>
     </dependency>
 
@@ -73,6 +73,13 @@
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <version>3.0.2</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <version>3.1.6</version>
       <scope>provided</scope>
     </dependency>
 

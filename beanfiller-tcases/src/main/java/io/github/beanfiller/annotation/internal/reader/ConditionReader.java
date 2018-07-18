@@ -23,6 +23,7 @@ import org.cornutum.tcases.conditions.ContainsAny;
 import org.cornutum.tcases.conditions.ICondition;
 import org.cornutum.tcases.conditions.Not;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -38,11 +39,15 @@ import java.util.stream.Collectors;
  * Since Java annotations do not allow nesting of @AllOf, @AnyOf, @Not,
  * this class parses Strings of the form "AllOf(AnyOf(x, y))" to ICondition
  */
-class ConditionReader {
+@SuppressWarnings("PMD.UseVarargs")
+public class ConditionReader {
 
-    @Nullable
-    static ICondition getCondition(@Nullable String[] when1, @Nonnull String[] when2, @Nonnull String[] whenNot) {
-        String[] when = mergeArrays(when1, when2);
+    private static final Pattern NO_PARENS = Pattern.compile("^[\\w_\\-,]*$");
+    private static final Pattern ATOMIC_CONDITION = Pattern.compile("^\\w+$");
+
+    @CheckForNull
+    public static ICondition getCondition(@Nullable String[] when1, String[] when2, String[] whenNot) {
+        final String[] when = mergeArrays(when1, when2);
 
         ICondition condition = null;
 
@@ -51,7 +56,7 @@ class ConditionReader {
         }
 
         if (whenNot.length > 0) {
-            ICondition excludes = new Not().add(anyOf(StringUtils.join(whenNot, ',')));
+            final ICondition excludes = new Not().add(anyOf(StringUtils.join(whenNot, ',')));
 
             condition = (condition == null) ? excludes : new AllOf(condition, excludes);
         }
@@ -60,13 +65,13 @@ class ConditionReader {
     }
 
     @Nonnull
-    static String[] mergeArrays(@Nullable String[] when1, @Nonnull String[] when2) {
+    static String[] mergeArrays(@Nullable String[] when1, String[] when2) {
         String[] when = when2;
         if (when1 != null) {
             if (when2.length == 0) {
                 when = when1;
             } else {
-                int oldsize = when2.length;
+                final int oldsize = when2.length;
                 when = Arrays.copyOf(when2, when1.length + when2.length);
                 System.arraycopy(when1, 0, when, oldsize, when1.length);
             }
@@ -78,7 +83,7 @@ class ConditionReader {
      * For simplicity, "foo,bar" in the context of "all of" means "AllOf(foo, bar)"
      */
     @Nonnull
-    private static ICondition anyOf(@Nonnull String con) {
+    private static ICondition anyOf(String con) {
         if (NO_PARENS.matcher(con).matches()) {
             return new ContainsAny(split(con));
         }
@@ -89,7 +94,7 @@ class ConditionReader {
      * For simplicity, "foo,bar" in the context of "any of" means "AnyOf(foo, bar)"
      */
     @Nonnull
-    private static ICondition allOf(@Nonnull String con) {
+    private static ICondition allOf(String con) {
         if (NO_PARENS.matcher(con).matches()) {
             return new ContainsAll(split(con));
         }
@@ -97,7 +102,7 @@ class ConditionReader {
     }
 
     @Nonnull
-    private static String[] split(@Nonnull String cons) {
+    private static String[] split(String cons) {
         // TODO: need to handle quoting and escaping?
         return cons.split(",");
     }
@@ -107,9 +112,9 @@ class ConditionReader {
      * @param con like "AllOf(a,b)", "AllOf(a,b),AnyOf(c,d),", "AnyOf(AllOf(foo,bar))"
      */
     @Nonnull
-    private static List<ICondition> parseValue(@Nonnull String con) {
-        StringTokenizer tokenizer = new StringTokenizer(con, "(),", true);
-        LinkedList<String> lexemes = new LinkedList<>();
+    private static List<ICondition> parseValue(String con) {
+        final StringTokenizer tokenizer = new StringTokenizer(con, "(),", true);
+        final Queue<String> lexemes = new LinkedList<>();
         while (tokenizer.hasMoreTokens()) {
             lexemes.add(tokenizer.nextToken());
         }
@@ -117,12 +122,12 @@ class ConditionReader {
     }
 
     @Nonnull
-    private static List<ICondition> consumeListOfConditions(@Nonnull Queue<String> lexemes) {
-        List<ICondition> result = new ArrayList<>();
+    private static List<ICondition> consumeListOfConditions(Queue<String> lexemes) {
+        final List<ICondition> result = new ArrayList<>();
         while (!lexemes.isEmpty()) {
             result.add(consumeSingleCondition(lexemes));
             if (!lexemes.isEmpty()) {
-                String lookahead = lexemes.peek();
+                final String lookahead = lexemes.peek();
                 if (")".equals(lookahead)) {
                     break;
                 }
@@ -136,32 +141,32 @@ class ConditionReader {
     }
 
     @Nonnull
-    private static ICondition consumeSingleCondition(@Nonnull Queue<String> lexemes) {
-        String nextToken = lexemes.poll();
+    private static ICondition consumeSingleCondition(Queue<String> lexemes) {
+        final String nextToken = lexemes.poll();
         if (nextToken == null) {
             throw new IllegalStateException("Bug: should never be null, invokers responsibility");
         }
-        ICondition nextCondition;
+        final ICondition nextCondition;
         if ("AllOf".equals(nextToken)) {
-            ICondition[] conditions = consumeArgList(lexemes);
+            final ICondition[] conditions = consumeArgList(lexemes);
             if (Arrays.stream(conditions).allMatch(c -> c instanceof Is)) {
-                nextCondition = new ContainsAll(Arrays.stream(conditions).map(c -> ((Is) c).value).collect(Collectors.toList()));
+                nextCondition = new ContainsAll(Arrays.stream(conditions).map(c -> ((Is) c).getValue()).collect(Collectors.toList()));
             } else {
-                nextCondition = new AllOf(Arrays.stream(conditions).map(c -> c instanceof Is ? new ContainsAll(((Is) c).value) : c).toArray(ICondition[]::new));
+                nextCondition = new AllOf(Arrays.stream(conditions).map(c -> c instanceof Is ? new ContainsAll(((Is) c).getValue()) : c).toArray(ICondition[]::new));
             }
         } else if ("AnyOf".equals(nextToken)) {
-            ICondition[] conditions = consumeArgList(lexemes);
+            final ICondition[] conditions = consumeArgList(lexemes);
             if (Arrays.stream(conditions).allMatch(c -> c instanceof Is)) {
-                nextCondition = new ContainsAny(Arrays.stream(conditions).map(c -> ((Is) c).value).collect(Collectors.toList()));
+                nextCondition = new ContainsAny(Arrays.stream(conditions).map(c -> ((Is) c).getValue()).collect(Collectors.toList()));
             } else {
-                nextCondition = new AnyOf(Arrays.stream(conditions).map(c -> c instanceof Is ? new ContainsAll(((Is) c).value) : c).toArray(ICondition[]::new));
+                nextCondition = new AnyOf(Arrays.stream(conditions).map(c -> c instanceof Is ? new ContainsAll(((Is) c).getValue()) : c).toArray(ICondition[]::new));
             }
         } else if ("Not".equals(nextToken)) {
-            ICondition[] conditions = consumeArgList(lexemes);
+            final ICondition[] conditions = consumeArgList(lexemes);
             if (Arrays.stream(conditions).allMatch(c -> c instanceof Is)) {
-                nextCondition = new Not(new ContainsAny(Arrays.stream(conditions).map(c -> ((Is) c).value).collect(Collectors.toList())));
+                nextCondition = new Not(new ContainsAny(Arrays.stream(conditions).map(c -> ((Is) c).getValue()).collect(Collectors.toList())));
             } else {
-                nextCondition = new Not(Arrays.stream(conditions).map(c -> c instanceof Is ? new ContainsAll(((Is) c).value) : c).toArray(ICondition[]::new));
+                nextCondition = new Not(Arrays.stream(conditions).map(c -> c instanceof Is ? new ContainsAll(((Is) c).getValue()) : c).toArray(ICondition[]::new));
             }
         } else if (ATOMIC_CONDITION.matcher(nextToken).matches()) {
             nextCondition = new Is(nextToken);
@@ -172,17 +177,17 @@ class ConditionReader {
     }
 
     @Nonnull
-    private static ICondition[] consumeArgList(@Nonnull Queue<String> lexemes) {
+    private static ICondition[] consumeArgList(Queue<String> lexemes) {
         if (lexemes.isEmpty()) {
             throw new IllegalStateException("Unexpected end of expression, expected '('");
         }
-        String nextToken = lexemes.poll();
+        final String nextToken = lexemes.poll();
         if (!"(".equals(nextToken)) {
             throw new IllegalStateException("Bad next token in expression, expected '('");
         }
-        List<ICondition> arguments = new ArrayList<>();
+        final List<ICondition> arguments = new ArrayList<>();
         while (!lexemes.isEmpty()) {
-            String lookahead = lexemes.peek();
+            final String lookahead = lexemes.peek();
             if (")".equals(lookahead)) {
                 break;
             }
@@ -194,12 +199,15 @@ class ConditionReader {
     private static class Is extends ContainsAll {
         private final String value;
 
-        private Is(String value) {
+        Is(String value) {
             super(value);
             this.value = value;
         }
+
+        public String getValue() {
+            return value;
+        }
     }
 
-    private static final Pattern NO_PARENS = Pattern.compile("^[\\w_\\-,]*$");
-    private static final Pattern ATOMIC_CONDITION = Pattern.compile("^\\w+$");
+
 }

@@ -27,13 +27,13 @@ import java.util.Collection;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
-public class DefaultStringToValueMapperTest {
+public class DefaultVariableToClassValueMapperTest {
 
     private final String valueString;
     private final Class<?> typeClass;
     private final Object value;
 
-    public DefaultStringToValueMapperTest(String valueString, Class<?> typeClass, Object value) {
+    public DefaultVariableToClassValueMapperTest(String valueString, Class<?> typeClass, Object value) {
         this.valueString = valueString;
         this.typeClass = typeClass;
         this.value = value;
@@ -127,7 +127,7 @@ public class DefaultStringToValueMapperTest {
 
     @Test
     public void testGetValueAs() {
-        assertThat(new DefaultStringToValueMapper().getClassValueAs(valueString, typeClass)).isEqualTo(value);
+        assertThat(new DefaultVariableToClassValueMapper().getClassValueAs(valueString, typeClass)).isEqualTo(value);
     }
 
     private enum SAMPLE {

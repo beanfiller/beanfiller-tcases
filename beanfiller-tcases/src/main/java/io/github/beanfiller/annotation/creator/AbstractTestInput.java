@@ -15,8 +15,6 @@ limitations under the License.
 
 package io.github.beanfiller.annotation.creator;
 
-import javax.annotation.Nonnull;
-
 /**
  * Default abstract implementation of TestMetadataAware
  */
@@ -29,10 +27,10 @@ public abstract class AbstractTestInput implements TestMetadataAware {
     private OutputAnnotationContainer outputAnnotations;
 
     @Override
-    public void setTestMetadata(int id, boolean isFailure, @Nonnull OutputAnnotationContainer outputAnnotationContainer) {
-        this.testCaseId = id;
-        this.failure = isFailure;
-        this.outputAnnotations = outputAnnotationContainer;
+    public void setTestMetadata(int id, boolean isFailure, OutputAnnotationContainer outputAnnotationContainer) {
+        testCaseId = id;
+        failure = isFailure;
+        outputAnnotations = outputAnnotationContainer;
     }
 
     public int getTestCaseId() {
@@ -43,6 +41,7 @@ public abstract class AbstractTestInput implements TestMetadataAware {
         return outputAnnotations;
     }
 
+    @Override
     public boolean isFailure() {
         return failure;
     }

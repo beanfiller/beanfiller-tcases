@@ -15,10 +15,11 @@ limitations under the License.
 
 package io.github.beanfiller.annotation.reader;
 
-import org.apache.commons.lang3.StringUtils;
 import io.github.beanfiller.annotation.annotations.SystemDef;
 import io.github.beanfiller.annotation.builders.SystemInputDefBuilder;
 import io.github.beanfiller.annotation.internal.reader.MapStringReader;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.cornutum.tcases.SystemInputDef;
 
 import javax.annotation.Nonnull;
@@ -41,7 +42,7 @@ public class SystemDefReader {
      */
     public SystemDefReader(@Nullable VarDefReader... readers) {
         if (readers == null) {
-            throw new NullPointerException("readers must not be null");
+            throw new IllegalArgumentException("readers must not be null");
         }
         this.functionDefReader = AnnotatedFunctionDefReader.withReaders(readers);
     }
@@ -52,7 +53,10 @@ public class SystemDefReader {
     @Nonnull
     public SystemInputDef readSystemDefFromFunctionDefs(@Nullable String systemName,
                                                         @Nullable Class<?>... functionDefClass) {
-        SystemInputDefBuilder inputDef = SystemInputDefBuilder.system(systemName);
+        if (ArrayUtils.isEmpty(functionDefClass)) {
+            throw new IllegalArgumentException("Def must not be null");
+        }
+        final SystemInputDefBuilder inputDef = SystemInputDefBuilder.system(systemName);
         addFunctionDefs(inputDef, functionDefReader, functionDefClass);
         return inputDef.build();
     }
@@ -62,12 +66,12 @@ public class SystemDefReader {
      * @return A System input definition containing testcases for each given function input definition
      */
     @Nonnull
-    public SystemInputDef readSystemDef(Class<?> systemDefClass) {
+    public SystemInputDef readSystemDef(@Nullable Class<?> systemDefClass) {
         if (systemDefClass == null) {
-            throw new NullPointerException("Cannot define system based on null class");
+            throw new IllegalArgumentException("Cannot define system based on null class");
         }
-        SystemDef systemAnnotation = systemDefClass.getAnnotation(SystemDef.class);
-        SystemInputDefBuilder builder = SystemInputDefBuilder.system(readSystemDefName(systemDefClass, systemAnnotation));
+        final SystemDef systemAnnotation = systemDefClass.getAnnotation(SystemDef.class);
+        final SystemInputDefBuilder builder = SystemInputDefBuilder.system(readSystemDefName(systemDefClass, systemAnnotation));
         if (systemAnnotation != null && systemAnnotation.value().length > 0) {
             addFunctionDefs(builder, functionDefReader, systemAnnotation.value());
         } else {
@@ -80,8 +84,8 @@ public class SystemDefReader {
         return builder.build();
     }
 
-    private static void addFunctionDefs(@Nonnull SystemInputDefBuilder builder, @Nonnull AnnotatedFunctionDefReader functionDefReader, @Nonnull Class<?>... functionDefClass) {
-        for (Class<?> annotatedClass : functionDefClass) {
+    private static void addFunctionDefs(SystemInputDefBuilder builder, AnnotatedFunctionDefReader functionDefReader, @Nullable Class<?>... functionDefs) {
+        for (final Class<?> annotatedClass : ArrayUtils.nullToEmpty(functionDefs)) {
             builder.addInputDef(functionDefReader.readFunctionInputDef(annotatedClass));
         }
     }
@@ -90,8 +94,8 @@ public class SystemDefReader {
      * returns the name given with the FunctionDef annotation, else the SimpleClassName.
      */
     @Nonnull
-    private static String readSystemDefName(@Nonnull Class<?> annotatedClass, @Nullable SystemDef systemDefAnnotation) {
-        String functionName;
+    private static String readSystemDefName(Class<?> annotatedClass, @Nullable SystemDef systemDefAnnotation) {
+        final String functionName;
         if (systemDefAnnotation == null || StringUtils.isBlank(systemDefAnnotation.name())) {
             functionName = annotatedClass.getSimpleName();
         } else {

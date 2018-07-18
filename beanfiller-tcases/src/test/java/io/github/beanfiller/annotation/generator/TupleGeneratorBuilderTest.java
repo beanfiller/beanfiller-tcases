@@ -38,9 +38,10 @@ public class TupleGeneratorBuilderTest {
         assertThat(generator.getCombiners()).isEmpty();
         assertThat(generator.getRandomSeed()).isEqualTo(123L);
 
-        assertThatThrownBy(() -> new TupleGeneratorBuilder().combiner(null)).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> new TupleGeneratorBuilder().combiner(null))
+                .isInstanceOf(IllegalArgumentException.class);
 
-        TupleCombiner combinerMock = mock(TupleCombiner.class);
+        final TupleCombiner combinerMock = mock(TupleCombiner.class);
         builder = new TupleGeneratorBuilder().combiner(combinerMock);
         generator = builder.build();
         assertThat(generator.getCombiners()).containsOnly(combinerMock);

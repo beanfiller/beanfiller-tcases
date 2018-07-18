@@ -18,8 +18,8 @@ package io.github.beanfiller.annotation.reader;
 import io.github.beanfiller.annotation.internal.reader.FieldWrapper;
 import org.cornutum.tcases.IVarDef;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Interface for classes defining Tcases values based on a java field.
@@ -39,6 +39,6 @@ public interface VarDefReader {
     /**
      * @return valid TCases IVarDef or null
      */
-    @Nullable
+    @CheckForNull
     IVarDef readVarDef(@Nonnull FieldWrapper field);
 }

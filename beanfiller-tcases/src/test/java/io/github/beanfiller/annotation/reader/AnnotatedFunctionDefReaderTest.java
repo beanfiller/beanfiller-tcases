@@ -39,9 +39,9 @@ public class AnnotatedFunctionDefReaderTest {
     @Test
     public void testWithReaders() {
         assertThatThrownBy(() -> AnnotatedFunctionDefReader.withReaders())
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> AnnotatedFunctionDefReader.withReaders((VarDefReader[]) null))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

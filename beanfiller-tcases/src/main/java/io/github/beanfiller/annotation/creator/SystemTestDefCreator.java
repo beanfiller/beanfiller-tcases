@@ -43,7 +43,7 @@ public class SystemTestDefCreator extends AbstractTestCaseCreator<SystemTestDefC
 
     private final List<Class<?>> functionDefinitions = new ArrayList<>();
 
-    public SystemTestDefCreator(SystemTestDef baseDef, String systemName, Class<?>... functionDefinitions) {
+    public SystemTestDefCreator(@Nullable SystemTestDef baseDef, @Nullable String systemName, @Nullable Class<?>... functionDefinitions) {
         super(baseDef);
         if (systemName == null) {
             this.systemName = baseDef.getName();
@@ -53,27 +53,29 @@ public class SystemTestDefCreator extends AbstractTestCaseCreator<SystemTestDefC
         this.functionDefinitions.addAll(Arrays.asList(functionDefinitions));
     }
 
-    public SystemTestDefCreator(String systemName, Class<?>... functionDefinitions) {
+    public SystemTestDefCreator(@Nullable String systemName, @Nullable Class<?>... functionDefinitions) {
         this((SystemTestDef) null, systemName, functionDefinitions);
     }
 
-    public SystemTestDefCreator(String baseDefFilePath,
-                                String systemName,
-                                Class<?>... functionDefinitions) {
+    public SystemTestDefCreator(@Nullable String baseDefFilePath,
+                                @Nullable String systemName,
+                                @Nullable Class<?>... functionDefinitions) {
         this(getSystemTestDef(baseDefFilePath), systemName, functionDefinitions);
-        this.base(new File(baseDefFilePath).toPath());
+        if (baseDefFilePath != null) {
+            base(new File(baseDefFilePath).toPath());
+        }
     }
 
     @Nonnull
     private static SystemTestDef createSystemTestDef(
-            @Nonnull AnnotatedFunctionDefReader reader,
-            @Nonnull String systemName,
+            AnnotatedFunctionDefReader reader,
+            String systemName,
             @Nullable SystemTestDef baseDef,
             @Nullable IGeneratorSet generatorSet,
             @Nullable GeneratorOptions options,
-            @Nonnull Class<?>... functionDefinitions) {
-        SystemInputDef systemInputDef = new SystemInputDef(systemName);
-        for (FunctionInputDef functionDef : reader.readFunctionDefs(functionDefinitions)) {
+            Class<?>... functionDefinitions) {
+        final SystemInputDef systemInputDef = new SystemInputDef(systemName);
+        for (final FunctionInputDef functionDef : reader.readFunctionDefs(functionDefinitions)) {
             systemInputDef.addFunctionInputDef(functionDef);
         }
         return Tcases.getTests(
@@ -85,13 +87,13 @@ public class SystemTestDefCreator extends AbstractTestCaseCreator<SystemTestDefC
 
     @Nonnull
     public SystemTestDef create() {
-        SystemTestDef systemTestDef = createSystemTestDef(getReader(),
+        final SystemTestDef systemTestDef = createSystemTestDef(getReader(),
                 systemName,
                 getBaseDef(),
                 getGeneratorSet(),
                 getOptions(),
                 functionDefinitions.toArray(new Class<?>[0]));
-        Path baseFile = getBaseFile();
+        final Path baseFile = getBaseFile();
         if (baseFile != null) {
             new SystemTestDefWriter().writeSystemDefToFile(systemTestDef, baseFile);
         }

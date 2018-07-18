@@ -26,27 +26,27 @@ import java.util.StringTokenizer;
 public class MapStringReader {
 
     @Nonnull
-    public static Map<String, String> parse(@Nonnull String[] havingStrings) {
-        Map<String, String> flatMap = new HashMap<>();
-        for (String havingString : havingStrings) {
+    public static Map<String, String> parse(String... havingStrings) {
+        final Map<String, String> flatMap = new HashMap<>();
+        for (final String havingString : havingStrings) {
             flatMap.putAll(parseHasValues(havingString));
         }
         return flatMap;
     }
 
     @Nonnull
-    static Map<String, String> parseHasValues(@Nonnull String havingString) {
-        Map<String, String> map = new HashMap<>();
-        StringTokenizer tokenizer = new StringTokenizer(havingString, ",");
+    static Map<String, String> parseHasValues(String havingString) {
+        final Map<String, String> map = new HashMap<>();
+        final StringTokenizer tokenizer = new StringTokenizer(havingString, ",");
         // TODO: Deal with quoting and escaping for values with comma, allowed in Tcases?
         while (tokenizer.hasMoreTokens()) {
-            String next = tokenizer.nextToken();
-            int equalsPos = next.indexOf(':');
+            final String next = tokenizer.nextToken();
+            final int equalsPos = next.indexOf(':');
             if (equalsPos <= 0) {
                 throw new IllegalStateException("Having expression must have a colon: '" + next + '\'');
             }
-            String key = next.substring(0, equalsPos);
-            String value = next.substring(equalsPos + 1);
+            final String key = next.substring(0, equalsPos);
+            final String value = next.substring(equalsPos + 1);
             if (map.put(key, value) != null) {
                 throw new IllegalStateException("Duplicate key: '" + key + '\'');
             }

@@ -19,8 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.cornutum.tcases.Annotated;
 import org.cornutum.tcases.VarBinding;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class OutputAnnotationContainer {
      */
     private final Map<String, String> varBindingAnnotations = new HashMap<>();
 
-    private static void addAll(@Nonnull Map<String, String> map, @Nonnull Annotated annotated) {
+    private static void addAll(Map<String, String> map, Annotated annotated) {
         annotated.getAnnotations().forEachRemaining(key -> map.put(key, annotated.getAnnotation(key)));
     }
 
@@ -49,7 +49,7 @@ public class OutputAnnotationContainer {
 
     public void addVarBindingAnnotations(String path, VarBinding annotated) {
         annotated.getAnnotations().forEachRemaining(key -> {
-            String prefixPath = StringUtils.isBlank(path) ? key : path + '.' + key;
+            final String prefixPath = StringUtils.isBlank(path) ? key : path + '.' + key;
             varBindingAnnotations.put(prefixPath, annotated.getAnnotation(key));
         });
     }
@@ -59,7 +59,7 @@ public class OutputAnnotationContainer {
         return testCaseAnnotations.keySet().iterator();
     }
 
-    @Nullable
+    @CheckForNull
     public String getTestCaseAnnotation(String key) {
         return testCaseAnnotations.get(key);
     }
@@ -69,7 +69,7 @@ public class OutputAnnotationContainer {
         return varBindingAnnotations.keySet().iterator();
     }
 
-    @Nullable
+    @CheckForNull
     public String getVarBindingAnnotation(String key) {
         return varBindingAnnotations.get(key);
     }

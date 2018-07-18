@@ -4,6 +4,7 @@ import org.cornutum.tcases.VarValueDef;
 import org.cornutum.tcases.conditions.ICondition;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,6 +21,10 @@ public class VarValueDefBuilder {
     private final List<String> properties = new ArrayList<>();
     private boolean isNull;
 
+    public VarValueDefBuilder(String valueAsString) {
+        this(valueAsString, VarValueDef.Type.VALID);
+    }
+
     public VarValueDefBuilder(String valueAsString, VarValueDef.Type type) {
         this.valueAsString = valueAsString;
         this.type = type;
@@ -32,7 +37,7 @@ public class VarValueDefBuilder {
     }
 
     @Nonnull
-    public VarValueDefBuilder condition(ICondition condition) {
+    public VarValueDefBuilder condition(@Nullable ICondition condition) {
         this.myCondition = condition;
         return this;
     }
@@ -44,21 +49,21 @@ public class VarValueDefBuilder {
     }
 
     @Nonnull
-    public VarValueDefBuilder addProperties(String[] properties) {
+    public VarValueDefBuilder addProperties(String... properties) {
         this.properties.addAll(Arrays.asList(properties));
         return this;
     }
 
     @Nonnull
     public VarValueDef build() {
-        VarValueDef varDef;
+        final VarValueDef varDef;
         if (isNull) {
             varDef = new PatchedVarNaDef(valueAsString, type);
         } else {
             varDef = new VarValueDef(valueAsString, type);
         }
         varDef.addProperties(properties);
-        for (Map.Entry<String, String> a : annotations.entrySet()) {
+        for (final Map.Entry<String, String> a : annotations.entrySet()) {
             varDef.setAnnotation(a.getKey(), a.getValue());
         }
         if (myCondition != null) {

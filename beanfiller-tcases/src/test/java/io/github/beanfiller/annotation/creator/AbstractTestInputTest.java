@@ -8,13 +8,16 @@ public class AbstractTestInputTest {
 
     @Test
     public void setTestMetadata() {
-        AbstractTestInput input = new AbstractTestInput() {
-        };
+        AbstractTestInput input = new StubTestInput();
         OutputAnnotationContainer container = new OutputAnnotationContainer();
         input.setTestMetadata(123, true, container);
 
         assertThat(input.getTestCaseId()).isEqualTo(123);
         assertThat(input.isFailure()).isTrue();
         assertThat(input.having()).isSameAs(container);
+    }
+
+    private static class StubTestInput extends AbstractTestInput {
+
     }
 }

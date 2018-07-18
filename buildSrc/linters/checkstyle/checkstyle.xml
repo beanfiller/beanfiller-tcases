@@ -25,7 +25,11 @@
         <property name="lineSeparator" value="lf"/>
     </module>
 
+    <module name="SuppressWarningsFilter" />
+
     <module name="TreeWalker">
+        <module name="SuppressWarningsHolder" />
+
         <module name="LineLength">
             <property name="max" value="180"/>
             <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
@@ -145,6 +149,12 @@
         <module name="RegexpSinglelineJava">
             <!-- Use specific PMD warnings, like @SuppressWarnings("PMD.foobar") -->
             <property name="format" value="@SuppressWarnings(&quot;PMD&quot;)"/>
+            <property name="ignoreComments" value="true"/>
+        </module>
+
+        <module name="RegexpSinglelineJava">
+            <!-- For Method returns, use @CheckForNull. Nullable has no effect, it neutralizes ParametersAreNonnullByDefault -->
+            <property name="format" value="@Nullable$"/>
             <property name="ignoreComments" value="true"/>
         </module>
 

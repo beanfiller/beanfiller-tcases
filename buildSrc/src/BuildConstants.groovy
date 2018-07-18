@@ -10,7 +10,7 @@ interface ToolVersions {
     static checkstyle = '8.10.1'
     static pmd = '6.4.0'
     static spotbugsPlugin = '1.6.0'
-    static spotbugs = '3.1.5'
+    static spotbugs = '3.1.6'
     static errorProne = '2.3.1'
     static jacocoPlugin = '0.4.0'
     static errorPronePlugin = '0.0.14'
@@ -27,8 +27,8 @@ interface Versions {
     static junit4 = '4.12'
     static junit5 = '5.2.0'
     static testng = '6.14.3'
-    static mockito = '2.18.3'
-    static powermock = '1.7.3'
+    static mockito = '2.21.0'
+    static powermock = '1.7.4'
     static hamcrest = '1.3'
 }
 
@@ -42,6 +42,7 @@ interface Libraries {
     static tcases = "org.cornutum.tcases:tcases-lib:2.0.0"
 
     static jsr305 = "com.google.code.findbugs:jsr305:${Versions.jsr305}"
+    static spotbugsAnnotations = "com.github.spotbugs:spotbugs-annotations:${ToolVersions.spotbugs}"
 
     static slf4j_api = "org.slf4j:slf4j-api:${Versions.slf4j}"
     static jcl_over_slf4j = "org.slf4j:jcl-over-slf4j:${Versions.slf4j}"
@@ -84,7 +85,9 @@ class Predefined {
 
         // provides javax.annotationsNonnull and CheckForNull, no runtime dependency
         compileOnly Libraries.jsr305
+        compileOnly Libraries.spotbugsAnnotations
         testCompileOnly Libraries.jsr305
+        testCompileOnly Libraries.spotbugsAnnotations
 
         compile Libraries.slf4j_api
 

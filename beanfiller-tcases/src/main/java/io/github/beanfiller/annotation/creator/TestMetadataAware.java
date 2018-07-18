@@ -15,8 +15,6 @@ limitations under the License.
 
 package io.github.beanfiller.annotation.creator;
 
-import javax.annotation.Nonnull;
-
 /**
  * Interface for testcases with methods to inject test metadata.
  * Implement this in the class in which you wish to inject metadata.
@@ -25,5 +23,7 @@ public interface TestMetadataAware {
     /**
      * will be called with the test Id.
      */
-    void setTestMetadata(int id, boolean isFailure, @Nonnull OutputAnnotationContainer outputAnnotationContainer);
+    void setTestMetadata(int id, boolean isFailure, OutputAnnotationContainer outputAnnotationContainer);
+
+    boolean isFailure();
 }

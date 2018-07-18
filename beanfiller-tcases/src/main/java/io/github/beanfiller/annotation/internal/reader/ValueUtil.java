@@ -31,8 +31,8 @@ class ValueUtil {
     }
 
     @Nonnull
-    static VarValueDef createVarValueDef(@Nonnull String name, @Nonnull Value varValue, @Nullable String[] conditions, boolean isNull) {
-        VarValueDefBuilder builder = new VarValueDefBuilder(name, typeOf(varValue));
+    static VarValueDef createVarValueDef(String name, Value varValue, @Nullable String[] conditions, boolean isNull) {
+        final VarValueDefBuilder builder = new VarValueDefBuilder(name, typeOf(varValue));
         builder.addAnnotations(MapStringReader.parse(varValue.having()));
         builder.addProperties(varValue.properties());
         builder.condition(getCondition(conditions, varValue.when(), varValue.whenNot()));
@@ -43,25 +43,25 @@ class ValueUtil {
     }
 
     @Nonnull
-    static VarValueDef createValidVarValueDef(@Nonnull String name, @Nullable String[] conditions) {
-        VarValueDefBuilder builder = new VarValueDefBuilder(name, VarValueDef.Type.VALID);
-        builder.condition(getCondition(conditions, new String[0], new String[0]));
-        return builder.build();
+    static VarValueDef createValidVarValueDef(String name, @Nullable String... conditions) {
+        return new VarValueDefBuilder(name, VarValueDef.Type.VALID)
+                .condition(getCondition(conditions, new String[0], new String[0]))
+                .build();
     }
 
     @Nonnull
-    static VarValueDef createNullVarValueDef(@Nullable String[] conditions) {
-        VarValueDefBuilder builder = new VarValueDefBuilder("NA", VarValueDef.Type.VALID);
-        builder.condition(getCondition(conditions, new String[0], new String[0]));
-        builder.setNull();
-        return builder.build();
+    static VarValueDef createNullVarValueDef(@Nullable String... conditions) {
+        return new VarValueDefBuilder("NA", VarValueDef.Type.VALID)
+                .condition(getCondition(conditions, new String[0], new String[0]))
+                .setNull()
+                .build();
     }
 
     /**
      * returns the Tcases Type given attributes of a Value annotation.
      */
     @Nonnull
-    static VarValueDef.Type typeOf(@Nonnull Value varValue) {
+    static VarValueDef.Type typeOf(Value varValue) {
         if (varValue.type() == TestCase.Type.FAILURE) {
             return VarValueDef.Type.FAILURE;
         }

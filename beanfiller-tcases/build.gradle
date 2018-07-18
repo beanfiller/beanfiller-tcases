@@ -9,6 +9,7 @@ apply plugin: 'signing' // for oss
 
 dependencies {
     compileOnly Libraries.jsr305
+    compile Libraries.spotbugsAnnotations
     // TODO: Allow using beanfiller without referencing tcases
     compile Libraries.tcases
     // For StringUtils
@@ -18,6 +19,7 @@ dependencies {
     compile Libraries.slf4j_api
 
     testCompileOnly Libraries.jsr305
+    testCompileOnly Libraries.spotbugsAnnotations
     testCompile LibraryGroups.unit_test
     testRuntime Libraries.logback
 }

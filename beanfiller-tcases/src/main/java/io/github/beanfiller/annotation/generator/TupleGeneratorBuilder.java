@@ -47,9 +47,9 @@ public class TupleGeneratorBuilder {
     }
 
     @Nonnull
-    public TupleGeneratorBuilder combiner(TupleCombiner combiner) {
+    public TupleGeneratorBuilder combiner(@Nullable TupleCombiner combiner) {
         if (combiner == null) {
-            throw new NullPointerException("must not add null combiner");
+            throw new IllegalArgumentException("must not add null combiner");
         }
         this.combiners.add(combiner);
         return this;
@@ -57,7 +57,7 @@ public class TupleGeneratorBuilder {
 
     @Nonnull
     public TupleGenerator build() {
-        TupleGenerator tupleGenerator = new TupleGenerator(tuples);
+        final TupleGenerator tupleGenerator = new TupleGenerator(tuples);
         tupleGenerator.setCombiners(combiners);
         if (myRandomSeed != null) {
             tupleGenerator.setRandomSeed(myRandomSeed);

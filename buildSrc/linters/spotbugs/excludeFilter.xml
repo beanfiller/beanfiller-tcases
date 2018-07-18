@@ -24,15 +24,11 @@
         <Bug pattern="" code=""/>
     </Match>
 
-	<Match>
-		<Class name="~.*MapperImpl" />
-	</Match>
-
 
     <!-- Ignore more bug types in JUnit Tests -->
     <Match>
         <Bug pattern="SIC_INNER_SHOULD_BE_STATIC,MS_PKGPROTECT,URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD,NP_NONNULL_PARAM_VIOLATION,SIC_INNER_SHOULD_BE_STATIC_ANON,UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD" />
-        <Class name="~.*\.*Test([\$a-zA-Z0-9])*" />
+        <Class name="~.*\.*(Test|Mock)([\$a-zA-Z0-9])*" />
     </Match>
 
 </FindBugsFilter>

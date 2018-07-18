@@ -7,6 +7,7 @@ import org.cornutum.tcases.SystemInputDef;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class SystemDefReaderTest {
 
@@ -52,6 +53,9 @@ public class SystemDefReaderTest {
 
     @Test
     public void readSystemDef() {
+        assertThatThrownBy(() -> new SystemDefReader().readSystemDefFromFunctionDefs("fooSystem", (Class[]) null))
+                .isInstanceOf(IllegalArgumentException.class);
+
         SystemInputDef systemDef = new SystemDefReader().readSystemDefFromFunctionDefs("fooSystem", FooSample.class, BarSample.class);
         assertThat(systemDef.getName()).isEqualTo("fooSystem");
         assertThat(systemDef.getFunctionInputDefs()).hasSize(2);

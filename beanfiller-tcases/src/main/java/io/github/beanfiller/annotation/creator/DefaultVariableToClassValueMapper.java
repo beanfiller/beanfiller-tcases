@@ -15,16 +15,18 @@ limitations under the License.
 
 package io.github.beanfiller.annotation.creator;
 
-import javax.annotation.Nonnull;
+import io.github.beanfiller.annotation.internal.reader.FieldWrapper;
+import org.cornutum.tcases.VarBinding;
+
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DefaultStringToValueMapper implements StringToValueMapper {
+public class DefaultVariableToClassValueMapper implements VariableToClassValueMapper {
 
     private static final Set<Class<?>> APPLICABLE_CLASSES;
 
@@ -53,27 +55,31 @@ public class DefaultStringToValueMapper implements StringToValueMapper {
 
 
     @Override
-    public boolean appliesTo(@Nonnull Field f) {
-        return f.getType().isEnum() || APPLICABLE_CLASSES.contains(f.getType());
+    public boolean appliesTo(final String varname, final Class<?> parentClass) {
+        final FieldWrapper f = getField(parentClass, varname);
+        return (f.getType().isEnum() || APPLICABLE_CLASSES.contains(f.getType()));
     }
 
-    @Nullable
     @Override
-    public Object getFieldValueAs(@Nullable String valueString, @Nonnull Field targetField) {
-        return getClassValueAs(valueString, targetField.getType());
+    public void setFieldValueAs(final String varname, final Object instance, final VarBinding varBinding) {
+        final FieldWrapper targetField = getField(instance.getClass(), varname);
+        final Object value = getClassValueAs(varBinding.getValue(), targetField.getType());
+        if (value != null) {
+            setFieldValue(instance, varname, value);
+        }
+
     }
 
     /**
      * Util method to set a bean field based on a String Value.
      */
-    @Nullable
+    @CheckForNull
     @SuppressWarnings({"unchecked", "PMD.CyclomaticComplexity"})
-    <C> C getClassValueAs(@Nullable String valueString, @Nonnull Class<C> targetType) {
-        // "NA" is TCases magic constant :-(
+    <C> C getClassValueAs(@Nullable String valueString, Class<C> targetType) {
         if (valueString == null) {
             return null;
         }
-        C result;
+        final C result;
         // TODO: Find better way to handle types, also primitive types
         if (targetType == Boolean.class || targetType == boolean.class) {
             result = (C) Boolean.valueOf(valueString);

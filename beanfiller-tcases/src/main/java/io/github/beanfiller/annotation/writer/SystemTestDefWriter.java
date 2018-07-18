@@ -35,7 +35,7 @@ public class SystemTestDefWriter {
      */
     @Nonnull
     public String createSystemDefXML(SystemTestDef systemTestDef) {
-        StringWriter writer = new StringWriter();
+        final StringWriter writer = new StringWriter();
         try (SystemTestDocWriter xmlwriter = createSysDocWriter(writer)) {
             xmlwriter.write(systemTestDef);
             xmlwriter.flush();

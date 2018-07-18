@@ -5,6 +5,7 @@ import org.cornutum.tcases.VarValueDef;
 import org.cornutum.tcases.conditions.ICondition;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,18 +40,18 @@ public class VarDefBuilder {
     }
 
     @Nonnull
-    public VarDefBuilder condition(ICondition newCondition) {
+    public VarDefBuilder condition(@Nullable ICondition newCondition) {
         this.myCondition = newCondition;
         return this;
     }
 
     @Nonnull
     public VarDef build() {
-        VarDef varDef = new VarDef(name);
-        for (VarValueDef varValueDef : varValueDefs) {
+        final VarDef varDef = new VarDef(name);
+        for (final VarValueDef varValueDef : varValueDefs) {
             varDef.addValue(varValueDef);
         }
-        for (Map.Entry<String, String> a : annotations.entrySet()) {
+        for (final Map.Entry<String, String> a : annotations.entrySet()) {
             varDef.setAnnotation(a.getKey(), a.getValue());
         }
         if (myCondition != null) {

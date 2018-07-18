@@ -15,7 +15,6 @@
 
   <name>Find Sample</name>
   <description>Generates test cases for an imaginary find in file function</description>
-  <url>https://github.com/Cornutum/tcases</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

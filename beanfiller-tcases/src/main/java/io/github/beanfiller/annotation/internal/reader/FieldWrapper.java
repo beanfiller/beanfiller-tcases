@@ -18,7 +18,7 @@ public class FieldWrapper {
         this.field = field;
     }
 
-    public static FieldWrapper of(@Nonnull Field field) {
+    public static FieldWrapper of(Field field) {
         return new FieldWrapper(field);
     }
 
@@ -38,6 +38,10 @@ public class FieldWrapper {
         return field.getType();
     }
 
+    public Class<?> getDeclaringClass() {
+        return field.getDeclaringClass();
+    }
+
     @Nonnull
     public List<FieldWrapper> getNonStaticNestedFields() {
         return getNonStaticFields(field.getType());
@@ -45,8 +49,8 @@ public class FieldWrapper {
 
     @Nonnull
     private static List<FieldWrapper> getNonStaticFields(Class<?> clazz) {
-        List<FieldWrapper> result = new ArrayList<>();
-        for (Field nestedField : clazz.getDeclaredFields()) {
+        final List<FieldWrapper> result = new ArrayList<>();
+        for (final Field nestedField : clazz.getDeclaredFields()) {
             if (!Modifier.isStatic(nestedField.getModifiers())) {
                 result.add(of(nestedField));
             }

@@ -13,6 +13,10 @@ My list of ideas to implement... pull requests welcome.
 
 * High priority
   * Feature: Support special non-primitives (Locale, Currency?)
+  * Feature: Consider Var ranges for numbers, times, dates, ...?
+  * Documentation: full test example
+  * Documentation: Custom type mapper
+  * Do not pass around annotation instances, wrap into adapter class satisfying interface as domain model. This allows different annotations
   * Design: Same type but different / interrelated values (testtime?)
   * Test: Customizable AnnotationsReaders and Type Emitters
     * Design: Annotate Value with BoundaryValueEnum and generator?
@@ -28,6 +32,7 @@ My list of ideas to implement... pull requests welcome.
   * Design: Persist (expected) values for combinations of tests
   * Design: Create Testcase reports in Excel
   * Bug: check output annotation duplication for nested VarDef (bug?)
+  * Design: Require each non-static field to have one Tcases annotation (Var, VarSet, TestCaseId, IsFailure)?
   * Feature: Create more test examples:
     * Triangle
     * Shop cart checkout
@@ -38,6 +43,8 @@ My list of ideas to implement... pull requests welcome.
     * ATM withdraw
     * Restassured/spring? example
     * JSoup Spring Thymeleaf example
+  * Design: Generator configuration inside FunctionInputDef (In particular for Combine)?
+    * Design: Generator Combiners from input def
   * Design: More reusable BoundaryValueCategory enums
   * Feature: Use beanfillers-annotations without tcases on the compile classpath
   * Design: custom VarDef / VarSet subclasses for reflection access?

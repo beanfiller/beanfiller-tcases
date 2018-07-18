@@ -4,6 +4,7 @@ import org.cornutum.tcases.FunctionInputDef;
 import org.cornutum.tcases.SystemInputDef;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,14 +16,14 @@ public class SystemInputDefBuilder {
     private final Map<String, String> annotations = new HashMap<>();
     private final List<FunctionInputDef> functionInputDefs = new ArrayList<>();
 
-    private SystemInputDefBuilder(String name) {
+    private SystemInputDefBuilder(@Nullable String name) {
         this.name = name;
     }
 
     @Nonnull
-    public static SystemInputDefBuilder system(String name, FunctionInputDef... functions) {
-        SystemInputDefBuilder systemInputDefBuilder = new SystemInputDefBuilder(name);
-        for (FunctionInputDef functionInputDef : functions) {
+    public static SystemInputDefBuilder system(@Nullable String name, FunctionInputDef... functions) {
+        final SystemInputDefBuilder systemInputDefBuilder = new SystemInputDefBuilder(name);
+        for (final FunctionInputDef functionInputDef : functions) {
             systemInputDefBuilder.addInputDef(functionInputDef);
         }
         return systemInputDefBuilder;
@@ -48,11 +49,11 @@ public class SystemInputDefBuilder {
 
     @Nonnull
     public SystemInputDef build() {
-        SystemInputDef systemInputDef = new SystemInputDef(name);
-        for (Map.Entry<String, String> annotation : annotations.entrySet()) {
+        final SystemInputDef systemInputDef = new SystemInputDef(name);
+        for (final Map.Entry<String, String> annotation : annotations.entrySet()) {
             systemInputDef.setAnnotation(annotation.getKey(), annotation.getValue());
         }
-        for (FunctionInputDef functionInputDef : functionInputDefs) {
+        for (final FunctionInputDef functionInputDef : functionInputDefs) {
             systemInputDef.addFunctionInputDef(functionInputDef);
         }
         return systemInputDef;

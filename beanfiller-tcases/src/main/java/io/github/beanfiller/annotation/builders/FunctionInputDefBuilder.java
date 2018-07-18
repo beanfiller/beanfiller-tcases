@@ -43,11 +43,11 @@ public class FunctionInputDefBuilder {
 
     @Nonnull
     public FunctionInputDef build() {
-        FunctionInputDef functionInputDef = new FunctionInputDef(name);
-        for (Map.Entry<String, String> annotation : annotations.entrySet()) {
+        final FunctionInputDef functionInputDef = new FunctionInputDef(name);
+        for (final Map.Entry<String, String> annotation : annotations.entrySet()) {
             functionInputDef.setAnnotation(annotation.getKey(), annotation.getValue());
         }
-        for (IVarDef varDef : varDefs) {
+        for (final IVarDef varDef : varDefs) {
             functionInputDef.addVarDef(varDef);
         }
         return functionInputDef;

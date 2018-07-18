@@ -42,9 +42,9 @@
   </organization>
 
   <scm>
-    <connection>scm:git:https://github.com/Cornutum/tcases</connection>
-    <developerConnection>scm:git:https://github.com/Cornutum/tcases</developerConnection>
-    <url>https://github.com/Cornutum/tcases</url>
+    <connection>scm:git:https://github.com/beanfiller/beanfiller-tcases</connection>
+    <developerConnection>scm:git:https://github.com/beanfiller/beanfiller-tcases</developerConnection>
+    <url>https://github.com/beanfiller/beanfiller-tcases</url>
   </scm>
 
   <issueManagement>

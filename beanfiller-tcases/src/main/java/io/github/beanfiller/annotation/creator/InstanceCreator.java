@@ -32,5 +32,5 @@ public interface InstanceCreator {
      * @return an Object of type T, with all fields of T filled according to testCase, recursively
      */
     @Nonnull
-    <T> T createDef(@Nonnull TestCase testCase, @Nonnull Class<T> typeClass, @Nonnull OutputAnnotationContainer outputAnnotations);
+    <T> T createDef(TestCase testCase, Class<T> typeClass, OutputAnnotationContainer outputAnnotations);
 }

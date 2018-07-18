@@ -45,30 +45,30 @@ class EnumFieldReader {
      */
     @Nonnull
     static List<VarValueDef> readVarValueDefsForEnumField(
-            @Nonnull Class<? extends Enum<?>> enumClass,
-            @Nullable Var varAnnotation,
-            @Nullable String[] conditions) {
-        List<VarValueDef> varValueDefs = new ArrayList<>();
+            final Class<? extends Enum<?>> enumClass,
+            @Nullable final Var varAnnotation,
+            @Nullable final String... conditions) {
         if (enumClass.getFields().length == 0) {
             throw new IllegalStateException("Enum '" + enumClass
                     + "' has no values.");
         }
 
-        Set<String> excludes = new HashSet<>();
+        final Set<String> excludes = new HashSet<>();
         if (varAnnotation != null) {
             excludes.addAll(Arrays.asList(varAnnotation.exclude()));
         }
-        for (Field enumField : enumClass.getFields()) {
-            String enumFieldName = enumField.getName();
+        final List<VarValueDef> varValueDefs = new ArrayList<>();
+        for (final Field enumField : enumClass.getFields()) {
+            final String enumFieldName = enumField.getName();
             excludes.remove(enumFieldName);
-            if (varAnnotation != null && Arrays.asList(varAnnotation.exclude()).contains(enumFieldName)) {
+            if ((varAnnotation != null) && Arrays.asList(varAnnotation.exclude()).contains(enumFieldName)) {
                 continue;
             }
-            VarValueDef value = getVarValueDefForEnum(enumClass, varAnnotation, enumFieldName, conditions);
+            final VarValueDef value = getVarValueDefForEnum(enumClass, varAnnotation, enumFieldName, conditions);
 
             varValueDefs.add(value);
         }
-        if (varAnnotation != null && varAnnotation.nullable()) {
+        if ((varAnnotation != null) && varAnnotation.nullable()) {
             varValueDefs.add(getVarValueDefForEnum(enumClass, varAnnotation, null, conditions));
         }
         if (!excludes.isEmpty()) {
@@ -77,16 +77,17 @@ class EnumFieldReader {
         return varValueDefs;
     }
 
+    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     @Nonnull
     private static VarValueDef getVarValueDefForEnum(
-            @Nonnull Class<? extends Enum<?>> enumClass,
-            @Nullable Var varAnnotation,
-            @Nullable String enumFieldName,
-            @Nullable String[] conditions) {
+            final Class<? extends Enum<?>> enumClass,
+            @Nullable final Var varAnnotation,
+            @Nullable final String enumFieldName,
+            @Nullable final String... conditions) {
         VarValueDef value = null;
-        if (varAnnotation != null && varAnnotation.value().length > 0) {
-            Set<String> values = new HashSet<>();
-            for (Value varValue : varAnnotation.value()) {
+        if ((varAnnotation != null) && (varAnnotation.value().length > 0)) {
+            final Set<String> values = new HashSet<>();
+            for (final Value varValue : varAnnotation.value()) {
                 try {
                     enumClass.getField(varValue.value());
                 } catch (NoSuchFieldException e) {

@@ -44,22 +44,20 @@ class VarValueDefReader {
      */
     @SuppressWarnings("unchecked")
     @Nonnull
-    static List<VarValueDef> readVarValueDefs(@Nonnull FieldWrapper field, @Nullable String[] conditions) {
-        List<VarValueDef> varValueDefs;
-        Var varAnnotation = field.getAnnotation(Var.class);
+    static List<VarValueDef> readVarValueDefs(final FieldWrapper field,
+                                              @Nullable final String... conditions) {
+        final List<VarValueDef> varValueDefs;
+        final Var varAnnotation = field.getAnnotation(Var.class);
         try {
-            if (field.getType() == Boolean.class || field.getType() == boolean.class) {
-                varValueDefs = readVarValueDefsForBoolean(varAnnotation, field.getType() == Boolean.class && (varAnnotation == null || varAnnotation.nullable()), conditions);
+            if ((field.getType() == Boolean.class) || (field.getType() == boolean.class)) {
+                varValueDefs = readVarValueDefsForBoolean(varAnnotation, (field.getType() == Boolean.class) && ((varAnnotation == null) || varAnnotation.nullable()), conditions);
             } else if (field.getType().isEnum()) {
                 varValueDefs = readVarValueDefsForEnumField((Class<? extends Enum<?>>) field.getType(), varAnnotation, conditions);
             } else {
                 if (field.getType().isPrimitive()) {
                     varValueDefs = getVarValuesNumbersStringPrimitive(varAnnotation, conditions, false);
-                } else if (field.getType() == String.class
-                        || Number.class.isAssignableFrom(field.getType())) {
-                    varValueDefs = getVarValuesNumbersStringPrimitive(varAnnotation, conditions, (varAnnotation == null || varAnnotation.nullable()));
                 } else {
-                    throw new IllegalStateException("Annotations not supported for other types than String, Number, boolean, Enum");
+                    varValueDefs = getVarValuesNumbersStringPrimitive(varAnnotation, conditions, ((varAnnotation == null) || varAnnotation.nullable()));
                 }
             }
         } catch (IllegalStateException e) {
@@ -71,19 +69,38 @@ class VarValueDefReader {
 
     @Nonnull
     private static List<VarValueDef> getVarValuesNumbersStringPrimitive(
-            @Nullable Var varAnnotation, String[] conditions, boolean includeNull) {
-        if (varAnnotation != null && varAnnotation.exclude().length > 0) {
+            @Nullable final Var varAnnotation,
+            @Nullable final String[] conditions,
+            final boolean includeNull) {
+        if ((varAnnotation != null) && (varAnnotation.exclude().length > 0)) {
             // TODO: When allowing generators, allow exclusions
             throw new IllegalStateException("Only Boolean and Enum type Vars can exclude values");
         }
-        if (varAnnotation == null || varAnnotation.value().length <= 0) {
-            throw new IllegalStateException("Fields must be enum, boolean or define values using @Var");
+        if ((varAnnotation == null) || (varAnnotation.value().length <= 0)) {
+            throw new IllegalStateException("Fields must be enum, boolean or define values using @Var(value=...)");
         }
 
-        Set<String> values = new HashSet<>();
-        List<VarValueDef> varValueDefs = new ArrayList<>();
+        final Set<String> collectedValues = new HashSet<>();
+        final List<VarValueDef> result = new ArrayList<>();
+        for (final VarValueDef varValueDef : getVarValueDefsFromAnnotation(varAnnotation, conditions, includeNull)) {
+            result.add(varValueDef);
+            if (!collectedValues.add(varValueDef.getName())) {
+                throw new IllegalStateException("@Value value '" + varValueDef.getName() + "' duplicate");
+            }
+        }
+
+
+        return result;
+    }
+
+
+    private static List<VarValueDef> getVarValueDefsFromAnnotation(
+            final Var varAnnotation,
+            @Nullable final String[] conditions,
+            final boolean includeNull) {
+        final List<VarValueDef> varValueDefs = new ArrayList<>();
         boolean foundNull = false;
-        for (Value varValue : varAnnotation.value()) {
+        for (final Value varValue : varAnnotation.value()) {
             if (varValue.isNull()) {
                 if (foundNull) {
                     throw new IllegalStateException("Duplicate definition with isNull");
@@ -92,14 +109,10 @@ class VarValueDefReader {
             } else {
                 varValueDefs.add(createVarValueDef(varValue.value(), varValue, conditions, varValue.isNull()));
             }
-            if (!values.add(varValue.value())) {
-                throw new IllegalStateException("@Value value '" + varValue.value() + "' duplicate");
-            }
         }
         if (includeNull && !foundNull) {
             varValueDefs.add(createNullVarValueDef(conditions));
         }
-
         return varValueDefs;
     }
 }

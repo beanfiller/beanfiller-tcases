@@ -20,6 +20,8 @@
     <allow class="javax.annotation.CheckReturnValue"/>
     <allow class="javax.annotation.PostConstruct"/>
     <allow class="javax.annotation.PreDestroy"/>
+    <allow class="javax.annotation.ParametersAreNonnullByDefault"/>
+    <allow class="edu.umd.cs.findbugs.annotations.SuppressFBWarnings"/>
     <!-- commons -->
     <allow class="com.google.common.annotations.VisibleForTesting"/>
     <allow pkg="org.slf4j"/>
@@ -59,6 +61,7 @@
 
     <subpackage name="creator">
         <allow pkg="io.github.beanfiller.annotation.generator"/>
+        <allow class="io.github.beanfiller.annotation.internal.reader.FieldWrapper"/>
         <allow pkg="io.github.beanfiller.annotation.reader"/>
         <allow class="org.xml.sax.SAXParseException"/>
         <allow pkg="io.github.beanfiller.annotation.writer"/>

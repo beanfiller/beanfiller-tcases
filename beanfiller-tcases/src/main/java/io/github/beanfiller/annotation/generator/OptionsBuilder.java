@@ -36,7 +36,7 @@ public class OptionsBuilder {
 
     @Nonnull
     public GeneratorOptions build() {
-        GeneratorOptions options = new GeneratorOptions();
+        final GeneratorOptions options = new GeneratorOptions();
         options.setRandomSeed(randomSeed);
         options.setDefaultTupleSize(defaultTupleSize);
         return options;

@@ -53,7 +53,7 @@ public class GeneratorSetBuilder {
      */
     @Nonnull
     public static GeneratorSetBuilder basicGeneratorSet(int tuples) {
-        GeneratorSetBuilder generatorSetBuilder = new GeneratorSetBuilder();
+        final GeneratorSetBuilder generatorSetBuilder = new GeneratorSetBuilder();
         generatorSetBuilder.defaultGenerator(new TupleGenerator(tuples));
         return generatorSetBuilder;
     }
@@ -91,7 +91,7 @@ public class GeneratorSetBuilder {
 
     @Nonnull
     public IGeneratorSet build() {
-        GeneratorSet generatorSet;
+        final GeneratorSet generatorSet;
         if (definitions.isEmpty() && myDefaultGenerator == null) {
             generatorSet = GeneratorSet.basicGenerator();
         } else {

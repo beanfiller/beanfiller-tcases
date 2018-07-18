@@ -15,12 +15,12 @@ limitations under the License.
 
 package io.github.beanfiller.annotation.internal.reader;
 
-import org.apache.commons.lang3.StringUtils;
 import io.github.beanfiller.annotation.annotations.Var;
 import io.github.beanfiller.annotation.annotations.VarSet;
 import io.github.beanfiller.annotation.builders.VarDefBuilder;
 import io.github.beanfiller.annotation.builders.VarSetBuilder;
 import io.github.beanfiller.annotation.reader.VarDefReader;
+import org.apache.commons.lang3.StringUtils;
 import org.cornutum.tcases.IVarDef;
 import org.cornutum.tcases.VarDef;
 import org.cornutum.tcases.VarValueDef;
@@ -38,15 +38,15 @@ import static io.github.beanfiller.annotation.internal.reader.VarValueDefReader.
 public class DefaultVarDefReader implements VarDefReader {
 
     @Override
-    public boolean appliesTo(@Nonnull FieldWrapper field) {
-        boolean hasVar = field.hasAnnotation(Var.class);
-        boolean hasVarSet = field.hasAnnotation(VarSet.class);
+    public boolean appliesTo(FieldWrapper field) {
+        final boolean hasVar = field.hasAnnotation(Var.class);
+        final boolean hasVarSet = field.hasAnnotation(VarSet.class);
         if (hasVar && hasVarSet) {
             throw new IllegalStateException("Cannot use @Var and @VarSet on same field");
         }
         if (!hasVar) {
             // TODO: defend against more conrner cases
-            Class<?> fieldClass = field.getType();
+            final Class<?> fieldClass = field.getType();
             if (fieldClass.isEnum()) {
                 throw new IllegalStateException("Cannot use Enum as VarSet. Hint: mark the enum field as @Var?");
             }
@@ -62,8 +62,8 @@ public class DefaultVarDefReader implements VarDefReader {
      */
     @Override
     @Nonnull
-    public IVarDef readVarDef(@Nonnull FieldWrapper field) {
-        return doReadVarDef(field, null, null);
+    public IVarDef readVarDef(FieldWrapper field) {
+        return doReadVarDef(field, null, (String) null);
     }
 
     /**
@@ -71,8 +71,8 @@ public class DefaultVarDefReader implements VarDefReader {
      * @param path context of field in current recursion, used for generating conditions
      */
     @Nonnull
-    private IVarDef doReadVarDef(@Nonnull FieldWrapper field, String path, String[] conditions) {
-        IVarDef varDef;
+    private IVarDef doReadVarDef(FieldWrapper field, @Nullable String path, @Nullable String... conditions) {
+        final IVarDef varDef;
 
         if (field.hasAnnotation(Var.class)) {
             varDef = readVarDefFromVarField(field, conditions);
@@ -87,34 +87,34 @@ public class DefaultVarDefReader implements VarDefReader {
      * @param path context of field in current recursion, used for generating conditions
      */
     @Nonnull
-    private org.cornutum.tcases.VarSet readVarSet(@Nonnull FieldWrapper field, @Nullable String path, @Nullable String[] conditions) {
+    private org.cornutum.tcases.VarSet readVarSet(FieldWrapper field, @Nullable String path, @Nullable String... conditions) {
         // recursion, TODO: make sure not circular
-        VarSetBuilder builder = VarSetBuilder.varSet(field.getName());
-        VarSet varSetAnnotation = field.getAnnotation(VarSet.class);
-        String[] when;
-        String[] whenNot;
-        if (varSetAnnotation != null) {
+        final VarSetBuilder builder = VarSetBuilder.varSet(field.getName());
+        final VarSet varSetAnnotation = field.getAnnotation(VarSet.class);
+        final String[] when;
+        final String[] whenNot;
+        if (varSetAnnotation == null) {
+            when = new String[0];
+            whenNot = new String[0];
+        } else {
             when = varSetAnnotation.when();
             whenNot = varSetAnnotation.whenNot();
             builder.addAnnotations(MapStringReader.parse(varSetAnnotation.having()));
-        } else {
-            when = new String[0];
-            whenNot = new String[0];
         }
         builder.condition(getCondition(conditions, when, whenNot));
 
         String[] newConditions = conditions;
         // if null is allowed add a control variable controlling the null testcase
         if (varSetAnnotation != null && varSetAnnotation.nullable()) {
-            VarValueDef trueValue = new VarValueDef("true", VarValueDef.Type.VALID);
-            String conditionValue = getFieldPath(path, field) + INITIALIZE_TESTCASE_VARNAME;
+            final VarValueDef trueValue = new VarValueDef("true", VarValueDef.Type.VALID);
+            final String conditionValue = getFieldPath(path, field) + INITIALIZE_TESTCASE_VARNAME;
             trueValue.addProperties(conditionValue);
-            trueValue.setCondition(ConditionReader.getCondition(conditions, new String[0], new String[0]));
-            VarValueDef falseValue = new VarValueDef("false", VarValueDef.Type.VALID);
-            falseValue.setCondition(ConditionReader.getCondition(conditions, new String[0], new String[0]));
+            trueValue.setCondition(getCondition(conditions, new String[0], new String[0]));
+            final VarValueDef falseValue = new VarValueDef("false", VarValueDef.Type.VALID);
+            falseValue.setCondition(getCondition(conditions, new String[0], new String[0]));
 
 
-            VarDef existsVarDef = new VarDef(INITIALIZE_TESTCASE_VARNAME);
+            final VarDef existsVarDef = new VarDef(INITIALIZE_TESTCASE_VARNAME);
             existsVarDef.addValue(trueValue);
             existsVarDef.addValue(falseValue);
 
@@ -129,32 +129,32 @@ public class DefaultVarDefReader implements VarDefReader {
             }
         }
 
-        for (FieldWrapper nestedField : field.getNonStaticNestedFields()) {
+        for (final FieldWrapper nestedField : field.getNonStaticNestedFields()) {
             builder.addMember(doReadVarDef(nestedField, getFieldPath(path, field), newConditions));
         }
         return builder.build();
     }
 
     @Nonnull
-    private static String getFieldPath(String parentPath, @Nonnull FieldWrapper field) {
+    private static String getFieldPath(@Nullable String parentPath, FieldWrapper field) {
         return (StringUtils.isBlank(parentPath) ? "" : parentPath + '-') + field.getName();
     }
 
     @Nonnull
-    private VarDef readVarDefFromVarField(@Nonnull FieldWrapper field, String[] conditions) {
-        VarDefBuilder builder = VarDefBuilder.varDef(field.getName());
-        Var varAnnotation = field.getAnnotation(Var.class);
-        String[] when;
-        String[] whenNot;
-        if (varAnnotation != null) {
+    private VarDef readVarDefFromVarField(FieldWrapper field, @Nullable String... conditions) {
+        final VarDefBuilder builder = VarDefBuilder.varDef(field.getName());
+        final Var varAnnotation = field.getAnnotation(Var.class);
+        final String[] when;
+        final String[] whenNot;
+        if (varAnnotation == null) {
+            when = new String[0];
+            whenNot = new String[0];
+        } else {
             builder.addAnnotations(MapStringReader.parse(varAnnotation.having()));
             when = varAnnotation.when();
             whenNot = varAnnotation.whenNot();
-        } else {
-            when = new String[0];
-            whenNot = new String[0];
         }
-        builder.condition(ConditionReader.getCondition(conditions, when, whenNot));
+        builder.condition(getCondition(conditions, when, whenNot));
         readVarValueDefs(field, conditions).forEach(builder::addValue);
         return builder.build();
     }

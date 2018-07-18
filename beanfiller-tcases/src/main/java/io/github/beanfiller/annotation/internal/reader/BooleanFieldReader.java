@@ -19,6 +19,7 @@ import io.github.beanfiller.annotation.annotations.Value;
 import io.github.beanfiller.annotation.annotations.Var;
 import org.cornutum.tcases.VarValueDef;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -43,21 +44,25 @@ class BooleanFieldReader {
      * Creates a true and a false VarValue, with additional properties if the Var annotation provides any.
      */
     @Nonnull
-    static List<VarValueDef> readVarValueDefsForBoolean(@Nullable Var varAnnotation, boolean includeNull, @Nullable String[] conditions) {
-        List<VarValueDef> varValues = new ArrayList<>();
-        List<String> valueStrings;
+    static List<VarValueDef> readVarValueDefsForBoolean(
+            @Nullable final Var varAnnotation,
+            final boolean includeNull,
+            @Nullable final String... conditions) {
+        final Set<String> excludes = new HashSet<>();
+        if (varAnnotation != null) {
+            excludes.addAll(Arrays.asList(varAnnotation.exclude()));
+        }
+
+        final List<VarValueDef> varValues = new ArrayList<>();
+        final List<String> valueStrings;
         if (includeNull) {
             valueStrings = Arrays.asList("true", "false", "null");
         } else {
             valueStrings = Arrays.asList("true", "false");
         }
-        Set<String> excludes = new HashSet<>();
-        if (varAnnotation != null) {
-            excludes.addAll(Arrays.asList(varAnnotation.exclude()));
-        }
-        for (String boolname : valueStrings) {
+        for (final String boolname : valueStrings) {
             excludes.remove(boolname);
-            VarValueDef value = getVarValueDefBoolean(varAnnotation, boolname, conditions);
+            final VarValueDef value = getVarValueDefBoolean(varAnnotation, boolname, conditions);
             if (value == null) {
                 continue;
             }
@@ -74,25 +79,29 @@ class BooleanFieldReader {
     /**
      * create true, false or NA value with properties from annotations
      */
-    @Nullable
-    private static VarValueDef getVarValueDefBoolean(@Nullable Var varAnnotation, @Nonnull String boolname, @Nullable String[] conditions) {
-        if (varAnnotation != null && Arrays.asList(varAnnotation.exclude()).contains(boolname)) {
+    @CheckForNull
+    private static VarValueDef getVarValueDefBoolean(
+            @Nullable final Var varAnnotation,
+            final String boolname,
+            @Nullable final String... conditions) {
+        if ((varAnnotation != null) && Arrays.asList(varAnnotation.exclude()).contains(boolname)) {
             return null;
         }
         VarValueDef value = null;
-        if (varAnnotation != null && varAnnotation.value().length > 0) {
-            Set<String> values = new HashSet<>();
-            for (Value varValue : varAnnotation.value()) {
-                if (!"true".equalsIgnoreCase(varValue.value())
-                        && !"null".equalsIgnoreCase(varValue.value())
-                        && !"false".equalsIgnoreCase(varValue.value())) {
-                    throw new IllegalStateException("@Value value '" + varValue.value()
+        if ((varAnnotation != null) && (varAnnotation.value().length > 0)) {
+            final Set<String> values = new HashSet<>();
+            for (final Value varValue : varAnnotation.value()) {
+                final String actualValueString = varValue.value();
+                if (!"true".equalsIgnoreCase(actualValueString)
+                        && !"null".equalsIgnoreCase(actualValueString)
+                        && !"false".equalsIgnoreCase(actualValueString)) {
+                    throw new IllegalStateException("@Value value '" + actualValueString
                             + "' not a valid Boolean value");
                 }
-                if (boolname.equalsIgnoreCase(varValue.value())) {
+                if (boolname.equalsIgnoreCase(actualValueString)) {
                     value = createVarValueDef(boolname, varValue, conditions, varValue.isNull());
-                    if (!values.add(varValue.value())) {
-                        throw new IllegalStateException("@Value value '" + varValue.value() + "' duplicate");
+                    if (!values.add(actualValueString)) {
+                        throw new IllegalStateException("@Value value '" + actualValueString + "' duplicate");
                     }
                 }
             }

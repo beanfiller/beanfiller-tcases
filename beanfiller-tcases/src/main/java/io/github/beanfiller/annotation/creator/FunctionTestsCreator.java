@@ -30,19 +30,27 @@ import java.util.List;
 public class FunctionTestsCreator<T> extends AbstractTestCaseCreator<FunctionTestsCreator<T>> {
 
     private final Class<T> functionDefClass;
+    private final FunctionInputDef inputDef;
 
-    public FunctionTestsCreator(@Nonnull Class<T> functionDefClass) {
+    public FunctionTestsCreator(Class<T> functionDefClass) {
+        super();
         this.functionDefClass = functionDefClass;
+        inputDef = getReader().readFunctionInputDef(functionDefClass);
+    }
+
+    public FunctionTestsCreator(FunctionInputDef inputDef, Class<T> functionDefClass) {
+        super();
+        this.functionDefClass = functionDefClass;
+        this.inputDef = inputDef;
     }
 
     @Nonnull
     public List<T> createDefs() {
-        FunctionInputDef inputDef = getReader().readFunctionInputDef(functionDefClass);
-        FunctionTestDef funTestDef = Tcases.getTests(inputDef,
+        final FunctionTestDef funTestDef = Tcases.getTests(inputDef,
                 getGeneratorSet(),
                 getBaseDef(),
                 getOptions());
-        List<T> result = new ArrayList<>();
+        final List<T> result = new ArrayList<>();
         funTestDef.getTestCases().forEachRemaining(testCase -> {
             result.add(getInstanceCreator().createDef(testCase, functionDefClass, new OutputAnnotationContainer()));
         });

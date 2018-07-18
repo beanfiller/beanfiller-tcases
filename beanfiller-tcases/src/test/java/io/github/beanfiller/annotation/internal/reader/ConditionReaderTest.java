@@ -17,14 +17,20 @@ package io.github.beanfiller.annotation.internal.reader;
 
 import org.cornutum.tcases.conditions.AllOf;
 import org.cornutum.tcases.conditions.AnyOf;
+import org.cornutum.tcases.conditions.ConditionSet;
 import org.cornutum.tcases.conditions.ContainsAll;
 import org.cornutum.tcases.conditions.ContainsAny;
+import org.cornutum.tcases.conditions.ICondition;
 import org.cornutum.tcases.conditions.Not;
+import org.cornutum.tcases.conditions.PropertyExpr;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import javax.annotation.Nullable;
+import java.util.Iterator;
+
 import static io.github.beanfiller.annotation.internal.reader.ConditionReader.getCondition;
 import static io.github.beanfiller.annotation.internal.reader.ConditionReader.mergeArrays;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNull;
 
 public class ConditionReaderTest {
@@ -38,52 +44,76 @@ public class ConditionReaderTest {
     @Test
     public void getConditionWhen() {
         assertNull(getCondition(null, EMPTY, EMPTY));
-        assertThat(getCondition(null, of("foo"), EMPTY))
-                .isEqualToComparingFieldByFieldRecursively(new ContainsAll("foo"));
-        assertThat(getCondition(null, of("foo", "bar"), EMPTY))
-                .isEqualToComparingFieldByFieldRecursively(new ContainsAll("foo", "bar"));
-        assertThat(getCondition(null, of("foo,bar"), EMPTY))
-                .isEqualToComparingFieldByFieldRecursively(new ContainsAll("foo", "bar"));
+        assertEqualConditions(getCondition(null, of("foo"), EMPTY),
+                new ContainsAll("foo"));
+        assertEqualConditions(getCondition(null, of("foo", "bar"), EMPTY),
+                new ContainsAll("foo", "bar"));
+        assertEqualConditions(getCondition(null, of("foo,bar"), EMPTY),
+                new ContainsAll("foo", "bar"));
 
         assertThat(getCondition(null, EMPTY, EMPTY)).isNull();
-        assertThat(getCondition(null, of("AllOf(foo)"), EMPTY))
-                .isEqualToComparingFieldByFieldRecursively(new AllOf(new ContainsAll("foo")));
-        assertThat(getCondition(null, of("AllOf(foo,bar)"), EMPTY))
-                .isEqualToComparingFieldByFieldRecursively(new AllOf(new ContainsAll("foo", "bar")));
-        assertThat(getCondition(null, of("AllOf(foo,Not(bar))"), EMPTY))
-                .isEqualToComparingFieldByFieldRecursively(new AllOf(new AllOf(
+        assertEqualConditions(getCondition(null, of("AllOf(foo)"), EMPTY),
+                new AllOf(new ContainsAll("foo")));
+        assertEqualConditions(getCondition(null, of("AllOf(foo,bar)"), EMPTY),
+                new AllOf(new ContainsAll("foo", "bar")));
+        assertEqualConditions(getCondition(null, of("AllOf(foo,Not(bar))"), EMPTY),
+                new AllOf(new AllOf(new ContainsAll("foo"), new Not(new ContainsAny("bar")))));
+
+        assertEqualConditions(getCondition(null, of("AnyOf(foo)"), EMPTY),
+                new AllOf(new ContainsAny("foo")));
+        assertEqualConditions(getCondition(null, of("AnyOf(foo,bar)"), EMPTY),
+                new AllOf(new ContainsAny("foo", "bar")));
+
+        assertEqualConditions(getCondition(null, EMPTY, of("foo")),
+                new Not(new ContainsAny("foo")));
+        assertEqualConditions(getCondition(null, EMPTY, of("foo", "bar")),
+                new Not(new ContainsAny("foo", "bar")));
+        assertEqualConditions(getCondition(null, EMPTY, of("foo,bar")),
+                new Not(new ContainsAny("foo", "bar")));
+
+        assertEqualConditions(getCondition(null, EMPTY, of("AllOf(foo,bar)")),
+                new Not(new AnyOf(new ContainsAll("foo", "bar"))));
+        assertEqualConditions(getCondition(null, EMPTY, of("AnyOf(foo,bar)")),
+                new Not(new AnyOf(new ContainsAny("foo", "bar"))));
+        assertEqualConditions(getCondition(null, EMPTY, of("AnyOf(foo,Not(bar))")),
+                new Not(new AnyOf(new AnyOf(
                         new ContainsAll("foo"),
-                        new Not(new ContainsAny("bar")))));
+                        new Not(new ContainsAny("bar"))))));
+        assertEqualConditions(getCondition(null, of("Not(foo)"), EMPTY),
+                new AllOf(new Not(new ContainsAny("foo"))));
+        assertEqualConditions(getCondition(null, of("Not(AllOf(foo,Not(bar)))"), EMPTY),
+                new AllOf(new Not(new AllOf(
+                        new ContainsAll("foo"),
+                        new Not(new ContainsAny("bar"))))));
+    }
 
-        assertThat(getCondition(null, of("AnyOf(foo)"), EMPTY))
-                .isEqualToComparingFieldByFieldRecursively(new AllOf(new ContainsAny("foo")));
-        assertThat(getCondition(null, of("AnyOf(foo,bar)"), EMPTY))
-                .isEqualToComparingFieldByFieldRecursively(new AllOf(new ContainsAny("foo", "bar")));
 
-        assertThat(getCondition(null, EMPTY, of("foo")))
-                .isEqualToComparingFieldByFieldRecursively(new Not(new ContainsAny("foo")));
-        assertThat(getCondition(null, EMPTY, of("foo", "bar")))
-                .isEqualToComparingFieldByFieldRecursively(new Not(new ContainsAny("foo", "bar")));
-        assertThat(getCondition(null, EMPTY, of("foo,bar")))
-                .isEqualToComparingFieldByFieldRecursively(new Not(new ContainsAny("foo", "bar")));
+    private void assertEqualConditions(@Nullable ICondition actual, ICondition expected) {
+        if (actual == null) {
+            assertThat(expected).isNull();
+            return;
+        }
 
-        assertThat(getCondition(null, EMPTY, of("AllOf(foo,bar)")))
-                .isEqualToComparingFieldByFieldRecursively(new Not(new AllOf(
-                        new ContainsAny("foo", "bar"))));
-        assertThat(getCondition(null, EMPTY, of("AnyOf(foo,bar)")))
-                .isEqualToComparingFieldByFieldRecursively(new Not(new AnyOf(
-                        new ContainsAny("foo", "bar"))));
-        assertThat(getCondition(null, EMPTY, of("AnyOf(foo,Not(bar))")))
-                .isEqualToComparingFieldByFieldRecursively(
-                        new Not(new AnyOf(new AnyOf(new ContainsAny("foo"),
-                                new Not(new ContainsAny("bar"))))));
-        assertThat(getCondition(null, of("Not(foo)"), EMPTY))
-                .isEqualToComparingFieldByFieldRecursively(new AllOf(
-                        new Not(new ContainsAny("foo"))));
-        assertThat(getCondition(null, of("Not(AllOf(foo,Not(bar)))"), EMPTY))
-                .isEqualToComparingFieldByFieldRecursively(new AllOf(
-                        new Not(new AllOf(new ContainsAll("foo"),
-                                new Not(new ContainsAny("bar"))))));
+        assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected);
+        assertThat(actual.getClass()).isEqualTo(expected.getClass());
+
+        if (actual instanceof ConditionSet) {
+            final Iterator<ICondition> a = ((ConditionSet) actual).getConditions();
+            final Iterator<ICondition> b = ((ConditionSet) expected).getConditions();
+            while (a.hasNext() && b.hasNext()) {
+                assertEqualConditions(a.next(), b.next());
+            }
+            assertThat(a.hasNext()).isFalse();
+            assertThat(b.hasNext()).isFalse();
+        } else if (actual instanceof PropertyExpr) {
+            final Iterator<String> a = ((PropertyExpr) actual).getProperties();
+            final Iterator<String> b = ((PropertyExpr) expected).getProperties();
+            while (a.hasNext() && b.hasNext()) {
+                assertThat(a.next()).isEqualTo(b.next());
+            }
+            assertThat(a.hasNext()).isFalse();
+            assertThat(b.hasNext()).isFalse();
+        }
     }
 
     @Test

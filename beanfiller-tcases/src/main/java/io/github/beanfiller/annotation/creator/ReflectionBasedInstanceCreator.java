@@ -35,20 +35,20 @@ import static io.github.beanfiller.annotation.reader.VarDefReader.INITIALIZE_TES
 public class ReflectionBasedInstanceCreator implements InstanceCreator {
 
     /**
-     * registry for finding a StringToValueMapper for a given target class
+     * registry for finding a VariableToClassValueMapper for a given target class
      */
-    private final List<StringToValueMapper> stringToValueList = new LinkedList<>();
+    private final List<VariableToClassValueMapper> stringToValueList = new LinkedList<>();
 
     @Nonnull
     public static ReflectionBasedInstanceCreator withDefaultMapper() {
-        ReflectionBasedInstanceCreator creator = new ReflectionBasedInstanceCreator();
-        creator.stringToValueList.add(new DefaultStringToValueMapper());
+        final ReflectionBasedInstanceCreator creator = new ReflectionBasedInstanceCreator();
+        creator.stringToValueList.add(new DefaultVariableToClassValueMapper());
         return creator;
     }
 
     @Nonnull
-    public static ReflectionBasedInstanceCreator withMappers(StringToValueMapper... mappers) {
-        ReflectionBasedInstanceCreator creator = new ReflectionBasedInstanceCreator();
+    public static ReflectionBasedInstanceCreator withMappers(VariableToClassValueMapper... mappers) {
+        final ReflectionBasedInstanceCreator creator = new ReflectionBasedInstanceCreator();
         creator.stringToValueList.addAll(Arrays.asList(mappers));
         return creator;
     }
@@ -58,12 +58,12 @@ public class ReflectionBasedInstanceCreator implements InstanceCreator {
      */
     @Override
     @Nonnull
-    public <T> T createDef(@Nonnull TestCase testCase,
-                           @Nonnull Class<T> typeClass,
-                           @Nonnull OutputAnnotationContainer outputAnnotations) {
-        T instance;
+    public <T> T createDef(TestCase testCase,
+                           Class<T> typeClass,
+                           OutputAnnotationContainer outputAnnotations) {
+        final T instance;
         try {
-            Constructor<T> declaredConstructor = typeClass.getDeclaredConstructor();
+            final Constructor<T> declaredConstructor = typeClass.getDeclaredConstructor();
             declaredConstructor.setAccessible(true);
             instance = declaredConstructor.newInstance();
             outputAnnotations.addTestCaseAnnotations(testCase);
@@ -82,11 +82,11 @@ public class ReflectionBasedInstanceCreator implements InstanceCreator {
      * Fill other fields with meta-information, if given annotation is present.
      */
     private void fillSpecialValues(
-            @Nonnull Object instance,
-            @Nonnull TestCase testCase,
-            @Nonnull OutputAnnotationContainer outputAnnotations) {
+            Object instance,
+            TestCase testCase,
+            OutputAnnotationContainer outputAnnotations) {
         if (TestMetadataAware.class.isAssignableFrom(instance.getClass())) {
-            TestMetadataAware testMetadataAware = (TestMetadataAware) instance;
+            final TestMetadataAware testMetadataAware = (TestMetadataAware) instance;
             testMetadataAware.setTestMetadata(
                     testCase.getId(),
                     testCase.getType() == TestCase.Type.FAILURE,
@@ -100,39 +100,32 @@ public class ReflectionBasedInstanceCreator implements InstanceCreator {
      * @param prefixLength      the initial varbinding key part to discard because of nesting depth
      * @param outputAnnotations Container to collect Vardef output annotations
      */
-    private <C> void fillValues(int prefixLength, @Nonnull final C instance,
-                                @Nonnull Collection<VarBinding> varBindings,
-                                @Nonnull OutputAnnotationContainer outputAnnotations) {
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    private <C> void fillValues(int prefixLength, final C instance,
+                                Collection<VarBinding> varBindings,
+                                OutputAnnotationContainer outputAnnotations) {
         // each Varbinding is either for a single data field of this instance, or a nested field
-        Map<String, List<VarBinding>> nestedFieldBindings = new HashMap<>();
-        for (VarBinding varBinding : varBindings) {
-            try {
-                String name = varBinding.getVar().substring(prefixLength);
-                if (INITIALIZE_TESTCASE_VARNAME.equals(name)) {
-                    continue;
+        final Map<String, List<VarBinding>> nestedFieldBindings = new HashMap<>();
+        for (final VarBinding varBinding : varBindings) {
+            final String name = varBinding.getVar().substring(prefixLength);
+            if (INITIALIZE_TESTCASE_VARNAME.equals(name)) {
+                continue;
+            }
+            outputAnnotations.addVarBindingAnnotations(name, varBinding);
+            final int firstDotPos = name.indexOf('.');
+            if (firstDotPos >= 0) {
+                final String mapKey = name.substring(0, firstDotPos);
+                final List<VarBinding> bindingList = nestedFieldBindings.computeIfAbsent(mapKey, k -> new ArrayList<>());
+                bindingList.add(varBinding);
+            } else {
+                final VariableToClassValueMapper mapper = getMapper(name, instance.getClass());
+                if (!varBinding.isValueNA()) {
+                    mapper.setFieldValueAs(name, instance, varBinding);
                 }
-                outputAnnotations.addVarBindingAnnotations(name, varBinding);
-                int firstDotPos = name.indexOf('.');
-                if (firstDotPos >= 0) {
-                    String mapKey = name.substring(0, firstDotPos);
-                    List<VarBinding> bindingList = nestedFieldBindings.getOrDefault(mapKey, new ArrayList<>());
-                    bindingList.add(varBinding);
-                    nestedFieldBindings.put(mapKey, bindingList);
-                } else {
-                    Field f = instance.getClass().getDeclaredField(name);
-                    f.setAccessible(true);
-                    if (!varBinding.isValueNA()) {
-                        Object valueOrNull = getMapper(f).getFieldValueAs(varBinding.getValue(), f);
-                        f.set(instance, valueOrNull);
-                    }
-                }
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException("Error setting " + varBinding.getVar()
-                        + " to '" + varBinding.getValue() + '\'', e);
             }
         }
         nestedFieldBindings.forEach((key, value) -> {
-            for (VarBinding binding : value) {
+            for (final VarBinding binding : value) {
                 // if parent is null, no need to fill children
                 if (binding.getVar().substring(prefixLength + key.length() + 1).equals(INITIALIZE_TESTCASE_VARNAME)
                         && (binding.isValueNA() || binding.getValue().equals("false"))) {
@@ -140,11 +133,11 @@ public class ReflectionBasedInstanceCreator implements InstanceCreator {
                 }
             }
             try {
-                Field f = instance.getClass().getDeclaredField(key);
+                final Field f = instance.getClass().getDeclaredField(key);
                 f.setAccessible(true);
                 Object fieldInstance = f.get(instance);
                 if (fieldInstance == null) {
-                    Constructor<?> declaredConstructor = f.getType().getDeclaredConstructor();
+                    final Constructor<?> declaredConstructor = f.getType().getDeclaredConstructor();
                     declaredConstructor.setAccessible(true);
                     fieldInstance = declaredConstructor.newInstance();
                     f.set(instance, fieldInstance);
@@ -157,13 +150,13 @@ public class ReflectionBasedInstanceCreator implements InstanceCreator {
     }
 
     @Nonnull
-    private StringToValueMapper getMapper(@Nonnull Field f) {
-        for (StringToValueMapper mapper : stringToValueList) {
-            if (mapper.appliesTo(f)) {
+    private VariableToClassValueMapper getMapper(String varname, Class<?> parentClass) {
+        for (final VariableToClassValueMapper mapper : stringToValueList) {
+            if (mapper.appliesTo(varname, parentClass)) {
                 return mapper;
             }
         }
-        throw new IllegalStateException("No mapper for field " + f);
+        throw new IllegalStateException("No mapper for variable " + varname);
     }
 
 

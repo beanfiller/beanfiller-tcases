@@ -15,9 +15,10 @@ limitations under the License.
 
 package io.github.beanfiller.annotation.internal.reader;
 
-import org.apache.commons.collections4.IteratorUtils;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.beanfiller.annotation.annotations.Value;
 import io.github.beanfiller.annotation.annotations.Var;
+import org.apache.commons.collections4.IteratorUtils;
 import org.cornutum.tcases.PropertySet;
 import org.cornutum.tcases.TestCase;
 import org.cornutum.tcases.VarValueDef;
@@ -27,72 +28,61 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.github.beanfiller.annotation.internal.reader.VarValueDefReader.readVarValueDefs;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
 public class VarValueDefReaderTest {
 
     @Test
     public void testReadVarValueDefsString() throws Exception {
-        Class<StringSamples> fieldSamplesClass = StringSamples.class;
+        final Class<StringSamples> fieldSamplesClass = StringSamples.class;
 
-        try {
-            getVarValueDefs("invalidNoVar", fieldSamplesClass, null);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            // pass
-        }
 
-        try {
-            getVarValueDefs("invalidNoValue", fieldSamplesClass, null);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            // pass
-        }
 
-        assertThat(getVarValueDefs("aStringWithVar1Value", fieldSamplesClass, null),
-                hasSize(2));
-        assertThat(getVarValueDefs("aStringWithVar1ValueNullable", fieldSamplesClass, null),
-                hasSize(1));
+        assertThatThrownBy(() -> getVarValueDefs("invalidNoVar", fieldSamplesClass, (String) null))
+                .isInstanceOf(IllegalStateException.class);
 
-        List<VarValueDef> aStringOnceFailure = getVarValueDefs("aStringOnceFailure", fieldSamplesClass, null);
-        assertThat(aStringOnceFailure, hasSize(2));
-        assertThat(aStringOnceFailure.get(0).getType(), equalTo(VarValueDef.Type.FAILURE));
+        assertThatThrownBy(() -> getVarValueDefs("invalidNoValue", fieldSamplesClass, (String) null))
+                .isInstanceOf(IllegalStateException.class);
 
-        try {
-            getVarValueDefs("invalidDuplicate", fieldSamplesClass, null);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            // pass
-        }
+        assertThat(getVarValueDefs("aStringWithVar1Value", fieldSamplesClass, (String) null))
+                .hasSize(2);
+        assertThat(getVarValueDefs("aStringWithVar1ValueNullable", fieldSamplesClass, (String) null))
+                .hasSize(1);
 
-        List<VarValueDef> aStringWithVar2Value
-                = getVarValueDefs("aStringWithVar2Value", fieldSamplesClass, null);
-        assertThat(aStringWithVar2Value, hasSize(3));
-        VarValueDef fooValue = aStringWithVar2Value.get(0);
-        VarValueDef barValue = aStringWithVar2Value.get(1);
-        VarValueDef nullValue = aStringWithVar2Value.get(2);
+        final List<VarValueDef> aStringOnceFailure = getVarValueDefs("aStringOnceFailure", fieldSamplesClass, (String) null);
+        assertThat(aStringOnceFailure).hasSize(2);
+        assertThat(aStringOnceFailure.get(0).getType()).isEqualTo(VarValueDef.Type.FAILURE);
 
-        assertThat(fooValue.getType(), equalTo(VarValueDef.Type.ONCE));
-        assertThat(barValue.getType(), equalTo(VarValueDef.Type.FAILURE));
-        assertThat(nullValue.getType(), equalTo(VarValueDef.Type.VALID));
+        assertThatThrownBy(() -> getVarValueDefs("invalidDuplicate", fieldSamplesClass, (String) null))
+            .isInstanceOf(IllegalStateException.class);
+
+        final List<VarValueDef> aStringWithVar2Value
+                = getVarValueDefs("aStringWithVar2Value", fieldSamplesClass, (String) null);
+        assertThat(aStringWithVar2Value).hasSize(3);
+        final VarValueDef fooValue = aStringWithVar2Value.get(0);
+        final VarValueDef barValue = aStringWithVar2Value.get(1);
+        final VarValueDef nullValue = aStringWithVar2Value.get(2);
+
+        assertThat(fooValue.getType()).isEqualTo(VarValueDef.Type.ONCE);
+        assertThat(barValue.getType()).isEqualTo(VarValueDef.Type.FAILURE);
+        assertThat(nullValue.getType()).isEqualTo(VarValueDef.Type.VALID);
 
         assertTrue(fooValue.getProperties().contains("fooProp"));
         assertFalse(fooValue.getProperties().contains("barProp"));
         assertFalse(barValue.getProperties().contains("fooProp"));
         assertTrue(barValue.getProperties().contains("barProp"));
 
-        List<String> fooAnnotations = IteratorUtils.toList(fooValue.getAnnotations());
-        assertThat(fooAnnotations, equalTo(Arrays.asList("fooHasKey")));
-        assertThat(fooValue.getAnnotation("fooHasKey"), equalTo("fooHasValue"));
+        final List<String> fooAnnotations = IteratorUtils.toList(fooValue.getAnnotations());
+        assertThat(fooAnnotations).isEqualTo(Arrays.asList("fooHasKey"));
+        assertThat(fooValue.getAnnotation("fooHasKey")).isEqualTo("fooHasValue");
 
-        List<String> barAnnotations = IteratorUtils.toList(barValue.getAnnotations());
-        assertThat(barAnnotations, equalTo(Arrays.asList("barHasKey")));
-        assertThat(barValue.getAnnotation("barHasKey"), equalTo("barHasValue"));
+        final List<String> barAnnotations = IteratorUtils.toList(barValue.getAnnotations());
+        assertThat(barAnnotations).isEqualTo(Arrays.asList("barHasKey"));
+        assertThat(barValue.getAnnotation("barHasKey")).isEqualTo("barHasValue");
 
         assertTrue(fooValue.getCondition().satisfied(new PropertySet("fooWhen")));
         assertFalse(fooValue.getCondition().satisfied(new PropertySet()));
@@ -138,59 +128,51 @@ public class VarValueDefReaderTest {
 
     @Test
     public void testReadVarValueDefsBoolean() throws Exception {
-        Class<BooleanFieldSamples> fieldSamplesClass = BooleanFieldSamples.class;
-        assertThat(getVarValueDefs("aBoolean", fieldSamplesClass, null),
-                hasSize(3));
-        assertThat(getVarValueDefs("aPrimitiveBoolean", fieldSamplesClass, null),
-                hasSize(2));
-        assertThat(getVarValueDefs("aBooleanWithVar", fieldSamplesClass, null),
-                hasSize(3));
-        assertThat(getVarValueDefs("aBooleanWithVar1Value", fieldSamplesClass, null),
-                hasSize(3));
-        assertThat(getVarValueDefs("aBooleanWithVar1ValueNotNullable", fieldSamplesClass, null),
-                hasSize(2));
-        assertThat(getVarValueDefs("aBooleanWithVar1ValueExclude0", fieldSamplesClass, null),
-                hasSize(2));
+        final Class<BooleanFieldSamples> fieldSamplesClass = BooleanFieldSamples.class;
+        assertThat(getVarValueDefs("aBoolean", fieldSamplesClass, (String) null))
+                .hasSize(3);
+        assertThat(getVarValueDefs("aPrimitiveBoolean", fieldSamplesClass, (String) null))
+                .hasSize(2);
+        assertThat(getVarValueDefs("aBooleanWithVar", fieldSamplesClass, (String) null))
+                .hasSize(3);
+        assertThat(getVarValueDefs("aBooleanWithVar1Value", fieldSamplesClass, (String) null))
+                .hasSize(3);
+        assertThat(getVarValueDefs("aBooleanWithVar1ValueNotNullable", fieldSamplesClass, (String) null))
+                .hasSize(2);
+        assertThat(getVarValueDefs("aBooleanWithVar1ValueExclude0", fieldSamplesClass, (String) null))
+                .hasSize(2);
 
-        List<VarValueDef> aBooleanOnceFailure = getVarValueDefs("aBooleanOnceFailure", fieldSamplesClass, null);
-        assertThat(aBooleanOnceFailure, hasSize(3));
-        assertThat(aBooleanOnceFailure.get(0).getType(), equalTo(VarValueDef.Type.FAILURE));
+        final List<VarValueDef> aBooleanOnceFailure = getVarValueDefs("aBooleanOnceFailure", fieldSamplesClass, (String) null);
+        assertThat(aBooleanOnceFailure).hasSize(3);
+        assertThat(aBooleanOnceFailure.get(0).getType()).isEqualTo(VarValueDef.Type.FAILURE);
 
-        try {
-            getVarValueDefs("invalidDuplicate", fieldSamplesClass, null);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            // pass
-        }
+        assertThatThrownBy(() -> getVarValueDefs("invalidDuplicate", fieldSamplesClass, (String) null))
+            .isInstanceOf(IllegalStateException.class);
 
-        try {
-            getVarValueDefs("invalidUnknown", fieldSamplesClass, null);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            // pass
-        }
+        assertThatThrownBy(() -> getVarValueDefs("invalidUnknown", fieldSamplesClass, (String) null))
+            .isInstanceOf(IllegalStateException.class);
 
-        List<VarValueDef> aBooleanWithVar2Value
-                = getVarValueDefs("aBooleanWithVar2Value", fieldSamplesClass, null);
-        assertThat(aBooleanWithVar2Value, hasSize(3));
-        VarValueDef trueValue = aBooleanWithVar2Value.get(0);
-        VarValueDef falseValue = aBooleanWithVar2Value.get(1);
+        final List<VarValueDef> aBooleanWithVar2Value
+                = getVarValueDefs("aBooleanWithVar2Value", fieldSamplesClass, (String) null);
+        assertThat(aBooleanWithVar2Value).hasSize(3);
+        final VarValueDef trueValue = aBooleanWithVar2Value.get(0);
+        final VarValueDef falseValue = aBooleanWithVar2Value.get(1);
 
-        assertThat(trueValue.getType(), equalTo(VarValueDef.Type.ONCE));
-        assertThat(falseValue.getType(), equalTo(VarValueDef.Type.FAILURE));
+        assertThat(trueValue.getType()).isEqualTo(VarValueDef.Type.ONCE);
+        assertThat(falseValue.getType()).isEqualTo(VarValueDef.Type.FAILURE);
 
         assertTrue(trueValue.getProperties().contains("trueProp"));
         assertFalse(trueValue.getProperties().contains("falseProp"));
         assertFalse(falseValue.getProperties().contains("trueProp"));
         assertTrue(falseValue.getProperties().contains("falseProp"));
 
-        List<String> trueAnnotations = IteratorUtils.toList(trueValue.getAnnotations());
-        assertThat(trueAnnotations, equalTo(Arrays.asList("trueHasKey")));
-        assertThat(trueValue.getAnnotation("trueHasKey"), equalTo("trueHasValue"));
+        final List<String> trueAnnotations = IteratorUtils.toList(trueValue.getAnnotations());
+        assertThat(trueAnnotations).isEqualTo(Arrays.asList("trueHasKey"));
+        assertThat(trueValue.getAnnotation("trueHasKey")).isEqualTo("trueHasValue");
 
-        List<String> falseAnnotations = IteratorUtils.toList(falseValue.getAnnotations());
-        assertThat(falseAnnotations, equalTo(Arrays.asList("falseHasKey")));
-        assertThat(falseValue.getAnnotation("falseHasKey"), equalTo("falseHasValue"));
+        final List<String> falseAnnotations = IteratorUtils.toList(falseValue.getAnnotations());
+        assertThat(falseAnnotations).isEqualTo(Arrays.asList("falseHasKey"));
+        assertThat(falseValue.getAnnotation("falseHasKey")).isEqualTo("falseHasValue");
 
         assertTrue(trueValue.getCondition().satisfied(new PropertySet("trueWhen")));
         assertFalse(trueValue.getCondition().satisfied(new PropertySet()));
@@ -243,57 +225,49 @@ public class VarValueDefReaderTest {
 
     @Test
     public void testReadVarValueDefsInteger() throws Exception {
-        Class<IntegerFieldSamples> fieldSamplesClass = IntegerFieldSamples.class;
-        assertThat(getVarValueDefs("anInteger", fieldSamplesClass, null),
-                hasSize(3));
-        assertThat(getVarValueDefs("aPrimitiveInteger", fieldSamplesClass, null),
-                hasSize(2));
-        assertThat(getVarValueDefs("anIntegerWithVar", fieldSamplesClass, null),
-                hasSize(3));
-        assertThat(getVarValueDefs("anIntegerWithVar1Value", fieldSamplesClass, null),
-                hasSize(3));
-        assertThat(getVarValueDefs("anIntegerWithVar1ValueNotNullable", fieldSamplesClass, null),
-                hasSize(2));
+        final Class<IntegerFieldSamples> fieldSamplesClass = IntegerFieldSamples.class;
+        assertThat(getVarValueDefs("anInteger", fieldSamplesClass, (String) null))
+                .hasSize(3);
+        assertThat(getVarValueDefs("aPrimitiveInteger", fieldSamplesClass, (String) null))
+                .hasSize(2);
+        assertThat(getVarValueDefs("anIntegerWithVar", fieldSamplesClass, (String) null))
+                .hasSize(3);
+        assertThat(getVarValueDefs("anIntegerWithVar1Value", fieldSamplesClass, (String) null))
+                .hasSize(3);
+        assertThat(getVarValueDefs("anIntegerWithVar1ValueNotNullable", fieldSamplesClass, (String) null))
+                .hasSize(2);
 
-        List<VarValueDef> anIntegerOnceFailure = getVarValueDefs("anIntegerOnceFailure", fieldSamplesClass, null);
-        assertThat(anIntegerOnceFailure, hasSize(3));
-        assertThat(anIntegerOnceFailure.get(0).getType(), equalTo(VarValueDef.Type.FAILURE));
+        final List<VarValueDef> anIntegerOnceFailure = getVarValueDefs("anIntegerOnceFailure", fieldSamplesClass, (String) null);
+        assertThat(anIntegerOnceFailure).hasSize(3);
+        assertThat(anIntegerOnceFailure.get(0).getType()).isEqualTo(VarValueDef.Type.FAILURE);
 
-        try {
-            getVarValueDefs("invalidDuplicate", fieldSamplesClass, null);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            // pass
-        }
+        assertThatThrownBy(() -> getVarValueDefs("invalidDuplicate", fieldSamplesClass, (String) null))
+            .isInstanceOf(IllegalStateException.class);
 
-        try {
-            getVarValueDefs("invalidDuplicateNull", fieldSamplesClass, null);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            // pass
-        }
+        assertThatThrownBy(() -> getVarValueDefs("invalidDuplicateNull", fieldSamplesClass, (String) null))
+            .isInstanceOf(IllegalStateException.class);
 
-        List<VarValueDef> anIntegerWithVar2Value
-                = getVarValueDefs("anIntegerWithVar2Value", fieldSamplesClass, null);
-        assertThat(anIntegerWithVar2Value, hasSize(3));
-        VarValueDef trueValue = anIntegerWithVar2Value.get(0);
-        VarValueDef falseValue = anIntegerWithVar2Value.get(1);
+        final List<VarValueDef> anIntegerWithVar2Value
+                = getVarValueDefs("anIntegerWithVar2Value", fieldSamplesClass, (String) null);
+        assertThat(anIntegerWithVar2Value).hasSize(3);
+        final VarValueDef trueValue = anIntegerWithVar2Value.get(0);
+        final VarValueDef falseValue = anIntegerWithVar2Value.get(1);
 
-        assertThat(trueValue.getType(), equalTo(VarValueDef.Type.ONCE));
-        assertThat(falseValue.getType(), equalTo(VarValueDef.Type.FAILURE));
+        assertThat(trueValue.getType()).isEqualTo(VarValueDef.Type.ONCE);
+        assertThat(falseValue.getType()).isEqualTo(VarValueDef.Type.FAILURE);
 
         assertTrue(trueValue.getProperties().contains("trueProp"));
         assertFalse(trueValue.getProperties().contains("falseProp"));
         assertFalse(falseValue.getProperties().contains("trueProp"));
         assertTrue(falseValue.getProperties().contains("falseProp"));
 
-        List<String> trueAnnotations = IteratorUtils.toList(trueValue.getAnnotations());
-        assertThat(trueAnnotations, equalTo(Arrays.asList("trueHasKey")));
-        assertThat(trueValue.getAnnotation("trueHasKey"), equalTo("trueHasValue"));
+        final List<String> trueAnnotations = IteratorUtils.toList(trueValue.getAnnotations());
+        assertThat(trueAnnotations).isEqualTo(Arrays.asList("trueHasKey"));
+        assertThat(trueValue.getAnnotation("trueHasKey")).isEqualTo("trueHasValue");
 
-        List<String> falseAnnotations = IteratorUtils.toList(falseValue.getAnnotations());
-        assertThat(falseAnnotations, equalTo(Arrays.asList("falseHasKey")));
-        assertThat(falseValue.getAnnotation("falseHasKey"), equalTo("falseHasValue"));
+        final List<String> falseAnnotations = IteratorUtils.toList(falseValue.getAnnotations());
+        assertThat(falseAnnotations).isEqualTo(Arrays.asList("falseHasKey"));
+        assertThat(falseValue.getAnnotation("falseHasKey")).isEqualTo("falseHasValue");
 
         assertTrue(trueValue.getCondition().satisfied(new PropertySet("trueWhen")));
         assertFalse(trueValue.getCondition().satisfied(new PropertySet()));
@@ -345,56 +319,43 @@ public class VarValueDefReaderTest {
 
     @Test
     public void testReadVarValueDefsEnum() throws Exception {
-        Class<EnumFieldSamples> fieldSamplesClass = EnumFieldSamples.class;
+        final Class<EnumFieldSamples> fieldSamplesClass = EnumFieldSamples.class;
 
-        try {
-            getVarValueDefs("enum0Field", fieldSamplesClass, null);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            // pass
-        }
+        assertThatThrownBy(() -> getVarValueDefs("enum0Field", fieldSamplesClass, (String) null))
+            .isInstanceOf(IllegalStateException.class);
 
-        assertThat(getVarValueDefs("enum1Field", fieldSamplesClass, null),
-                hasSize(1));
-        assertThat(getVarValueDefs("enum3Field", fieldSamplesClass, null),
-                hasSize(3));
-        assertThat(getVarValueDefs("enum3FieldVar", fieldSamplesClass, null),
-                hasSize(4));
-        assertThat(getVarValueDefs("enum3FieldVarWithNull", fieldSamplesClass, null),
-                hasSize(4));
-        assertThat(getVarValueDefs("enum3FieldVarNotNullable", fieldSamplesClass, null),
-                hasSize(3));
+        assertThat(getVarValueDefs("enum1Field", fieldSamplesClass, (String) null))
+                .hasSize(1);
+        assertThat(getVarValueDefs("enum3Field", fieldSamplesClass, (String) null))
+                .hasSize(3);
+        assertThat(getVarValueDefs("enum3FieldVar", fieldSamplesClass, (String) null))
+                .hasSize(4);
+        assertThat(getVarValueDefs("enum3FieldVarWithNull", fieldSamplesClass, (String) null))
+                .hasSize(4);
+        assertThat(getVarValueDefs("enum3FieldVarNotNullable", fieldSamplesClass, (String) null))
+                .hasSize(3);
 
-        List<VarValueDef> aEnumOnceFailure = getVarValueDefs("anEnumOnceFailure", fieldSamplesClass, null);
-        assertThat(aEnumOnceFailure, hasSize(2));
-        assertThat(aEnumOnceFailure.get(0).getType(), equalTo(VarValueDef.Type.FAILURE));
+        final List<VarValueDef> aEnumOnceFailure = getVarValueDefs("anEnumOnceFailure", fieldSamplesClass, (String) null);
+        assertThat(aEnumOnceFailure).hasSize(2);
+        assertThat(aEnumOnceFailure.get(0).getType()).isEqualTo(VarValueDef.Type.FAILURE);
 
 
-        try {
-            getVarValueDefs("invalidDuplicate", fieldSamplesClass, null);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            // pass
-        }
+        assertThatThrownBy(() -> getVarValueDefs("invalidDuplicate", fieldSamplesClass, (String) null))
+            .isInstanceOf(IllegalStateException.class);
 
-        try {
-            getVarValueDefs("invalidUnknown", fieldSamplesClass, null);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException e) {
-            // pass
-            assert e != null;
-        }
+        assertThatThrownBy(() -> getVarValueDefs("invalidUnknown", fieldSamplesClass, (String) null))
+            .isInstanceOf(IllegalStateException.class);
 
-        List<VarValueDef> aEnumWithVar2Value
-                = getVarValueDefs("enum3FieldVarFull", fieldSamplesClass, null);
-        assertThat(aEnumWithVar2Value, hasSize(4));
-        VarValueDef a1Value = aEnumWithVar2Value.get(0);
-        VarValueDef a2Value = aEnumWithVar2Value.get(1);
-        VarValueDef a3Value = aEnumWithVar2Value.get(2);
+        final List<VarValueDef> aEnumWithVar2Value
+                = getVarValueDefs("enum3FieldVarFull", fieldSamplesClass, (String) null);
+        assertThat(aEnumWithVar2Value).hasSize(4);
+        final VarValueDef a1Value = aEnumWithVar2Value.get(0);
+        final VarValueDef a2Value = aEnumWithVar2Value.get(1);
+        final VarValueDef a3Value = aEnumWithVar2Value.get(2);
         // TODO: assert a4Value NA
 
-        assertThat(a1Value.getType(), equalTo(VarValueDef.Type.ONCE));
-        assertThat(a2Value.getType(), equalTo(VarValueDef.Type.FAILURE));
+        assertThat(a1Value.getType()).isEqualTo(VarValueDef.Type.ONCE);
+        assertThat(a2Value.getType()).isEqualTo(VarValueDef.Type.FAILURE);
 
         assertTrue(a1Value.getProperties().contains("a1Prop"));
         assertFalse(a1Value.getProperties().contains("a2Prop"));
@@ -403,13 +364,13 @@ public class VarValueDefReaderTest {
         assertFalse(a3Value.getProperties().contains("a2Prop"));
         assertFalse(a3Value.getProperties().contains("a1Prop"));
 
-        List<String> a1Annotations = IteratorUtils.toList(a1Value.getAnnotations());
-        assertThat(a1Annotations, equalTo(Arrays.asList("a1HasKey")));
-        assertThat(a1Value.getAnnotation("a1HasKey"), equalTo("a1HasValue"));
+        final List<String> a1Annotations = IteratorUtils.toList(a1Value.getAnnotations());
+        assertThat(a1Annotations).isEqualTo(Arrays.asList("a1HasKey"));
+        assertThat(a1Value.getAnnotation("a1HasKey")).isEqualTo("a1HasValue");
 
-        List<String> a2Annotations = IteratorUtils.toList(a2Value.getAnnotations());
-        assertThat(a2Annotations, equalTo(Arrays.asList("a2HasKey")));
-        assertThat(a2Value.getAnnotation("a2HasKey"), equalTo("a2HasValue"));
+        final List<String> a2Annotations = IteratorUtils.toList(a2Value.getAnnotations());
+        assertThat(a2Annotations).isEqualTo(Arrays.asList("a2HasKey"));
+        assertThat(a2Value.getAnnotation("a2HasKey")).isEqualTo("a2HasValue");
 
         assertTrue(a1Value.getCondition().satisfied(new PropertySet("aWhen")));
         assertFalse(a1Value.getCondition().satisfied(new PropertySet()));
@@ -466,7 +427,8 @@ public class VarValueDefReaderTest {
         }
     }
 
-    private List<VarValueDef> getVarValueDefs(String name, Class<?> fieldSamplesClass1, String[] conditions) throws NoSuchFieldException {
+
+    private List<VarValueDef> getVarValueDefs(String name, Class<?> fieldSamplesClass1, String... conditions) throws NoSuchFieldException {
         return readVarValueDefs(FieldWrapper.of(fieldSamplesClass1.getDeclaredField(name)), conditions);
     }
 }

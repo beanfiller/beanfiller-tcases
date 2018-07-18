@@ -25,6 +25,7 @@ import org.cornutum.tcases.io.SystemTestDocReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InputStream;
@@ -56,11 +57,11 @@ abstract class AbstractTestCaseCreator<B extends AbstractTestCaseCreator<?>> {
         this(null);
     }
 
-    AbstractTestCaseCreator(SystemTestDef baseDef) {
+    AbstractTestCaseCreator(@Nullable SystemTestDef baseDef) {
         this.baseTestDef = baseDef;
     }
 
-    @Nullable
+    @CheckForNull
     static SystemTestDef getSystemTestDef(@Nullable String baseDefFilePath) {
         if (baseDefFilePath == null) {
             return null;
@@ -68,12 +69,14 @@ abstract class AbstractTestCaseCreator<B extends AbstractTestCaseCreator<?>> {
         return getSystemTestDef(() -> Files.newInputStream(Paths.get(baseDefFilePath)),
                 ioe -> {
                     // pass
-                    logger.debug("File " + baseDefFilePath, ioe);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("File " + baseDefFilePath, ioe);
+                    }
                     throw new RuntimeException(ioe);
                 });
     }
 
-    @Nullable
+    @CheckForNull
     static SystemTestDef getSystemTestDef(@Nullable URL baseFileURL) {
         if (baseFileURL == null) {
             return null;
@@ -81,13 +84,16 @@ abstract class AbstractTestCaseCreator<B extends AbstractTestCaseCreator<?>> {
         return getSystemTestDef(baseFileURL::openStream,
                 ioe -> {
                     // pass
-                    logger.debug("URL " + baseFileURL, ioe);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("URL " + baseFileURL, ioe);
+                    }
                     throw new RuntimeException(ioe);
                 });
     }
 
-    @Nullable
-    private static SystemTestDef getSystemTestDef(@Nonnull Callable<InputStream> iSupplier, @Nonnull Consumer<Exception> errorHandler) {
+    @SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.AvoidRethrowingException"})
+    @CheckForNull
+    private static SystemTestDef getSystemTestDef(Callable<InputStream> iSupplier, Consumer<Exception> errorHandler) {
         SystemTestDef baseDef = null;
         try (InputStream stream = iSupplier.call()) {
             baseDef = new SystemTestDocReader(stream).getSystemTestDef();
@@ -106,8 +112,8 @@ abstract class AbstractTestCaseCreator<B extends AbstractTestCaseCreator<?>> {
      * looks up previous definitions from given file on classpath at clazz location
      */
     @Nonnull
-    public B baseResource(@Nonnull Class<?> clazz, @Nullable String filename) {
-        URL baseFileURL = clazz.getResource(filename);
+    public B baseResource(Class<?> clazz, @Nullable String filename) {
+        final URL baseFileURL = clazz.getResource(filename);
         // if file exists
         if (baseFileURL == null) {
             throw new RuntimeException(new NoSuchFileException("Cannot find " + filename + " near " + clazz));
@@ -192,12 +198,12 @@ abstract class AbstractTestCaseCreator<B extends AbstractTestCaseCreator<?>> {
         return myGeneratorSet;
     }
 
-    @Nullable
+    @CheckForNull
     protected SystemTestDef getBaseDef() {
         return baseTestDef;
     }
 
-    @Nullable
+    @CheckForNull
     protected Path getBaseFile() {
         return baseTestDefFile;
     }

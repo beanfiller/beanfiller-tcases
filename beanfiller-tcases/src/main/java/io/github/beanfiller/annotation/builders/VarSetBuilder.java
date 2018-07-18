@@ -5,6 +5,7 @@ import org.cornutum.tcases.VarSet;
 import org.cornutum.tcases.conditions.ICondition;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,18 +41,18 @@ public class VarSetBuilder {
     }
 
     @Nonnull
-    public VarSetBuilder condition(ICondition newCondition) {
+    public VarSetBuilder condition(@Nullable ICondition newCondition) {
         this.myCondition = newCondition;
         return this;
     }
 
     @Nonnull
     public VarSet build() {
-        VarSet varDef = new VarSet(name);
-        for (IVarDef member : members) {
+        final VarSet varDef = new VarSet(name);
+        for (final IVarDef member : members) {
             varDef.addMember(member);
         }
-        for (Map.Entry<String, String> a : annotations.entrySet()) {
+        for (final Map.Entry<String, String> a : annotations.entrySet()) {
             varDef.setAnnotation(a.getKey(), a.getValue());
         }
         if (myCondition != null) {

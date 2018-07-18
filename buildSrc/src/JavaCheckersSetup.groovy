@@ -82,7 +82,7 @@ private static void configurePMD(Project project) {
                     pmdXml.file.each({ fileNode ->
                         println("PMD of $project.name:" + fileNode.@name.text() + ':')
                         fileNode.violation.each({ violationNode ->
-                            println("  ${violationNode.@beginline}-${violationNode.@endline}  " + violationNode.text().trim())
+                            println("${violationNode.@beginline}-${violationNode.@endline} ${violationNode.text().trim()}  (${violationNode.@ruleset}: ${violationNode.@rule})")
                         })
                     })
                 }
