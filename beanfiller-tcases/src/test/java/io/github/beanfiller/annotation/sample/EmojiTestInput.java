@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
+@Combiners{tuples = 1,
+        value = @Combiner("EYEMOUTH", tuples = 2)}
 public class EmojiTestInput {
 
     @SuppressFBWarnings("RE_POSSIBLE_UNINTENDED_PATTERN")
@@ -39,10 +41,13 @@ public class EmojiTestInput {
     }
 
     @Var(generator = "eyeValues")
+
+    @Combination("EYEMOUTH")
     char eye;
 
     @Var(value = {@Value("-"), @Value("_"), @Value("‿"), @Value("∇"), @Value("◡"), @Value("³"),
             @Value("ᴗ"), @Value("﹏"), @Value(".")})
+    @Combination("EYEMOUTH")
     char snoot;
 
     @Var(value = {@Value("\\/"), @Value("ᕙᕗ"), @Value("ᕦᕤ"), @Value("┌ʃ")})
