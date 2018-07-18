@@ -17,6 +17,9 @@ package io.github.beanfiller.annotation.internal.reader;
 
 import io.github.beanfiller.annotation.annotations.Value;
 import io.github.beanfiller.annotation.annotations.Var;
+import io.github.beanfiller.annotation.annotations.VarValueTemplate;
+import io.github.beanfiller.annotation.builders.VarValueDefBuilder;
+import org.cornutum.tcases.TestCase;
 import org.cornutum.tcases.VarValueDef;
 
 import javax.annotation.Nonnull;
@@ -28,13 +31,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static io.github.beanfiller.annotation.internal.reader.ConditionReader.getCondition;
 import static io.github.beanfiller.annotation.internal.reader.ValueUtil.createNullVarValueDef;
 import static io.github.beanfiller.annotation.internal.reader.ValueUtil.createValidVarValueDef;
 import static io.github.beanfiller.annotation.internal.reader.ValueUtil.createVarValueDef;
+import static io.github.beanfiller.annotation.internal.reader.ValueUtil.typeOf;
 
 /**
  * Define values for an enum field annotated with @Var
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class EnumFieldReader {
 
     private EnumFieldReader() {
@@ -44,7 +50,7 @@ class EnumFieldReader {
      * Creates VarValue for each enum constant, with additional properties if the Var annotation provides any.
      */
     @Nonnull
-    static List<VarValueDef> readVarValueDefsForEnumField(
+    static List<VarValueDef> readVarValueDefsForEnumFields(
             final Class<? extends Enum<?>> enumClass,
             @Nullable final Var varAnnotation,
             @Nullable final String... conditions) {
@@ -56,9 +62,7 @@ class EnumFieldReader {
         final Set<String> excludes = new HashSet<>();
         if (varAnnotation != null) {
             excludes.addAll(Arrays.asList(varAnnotation.exclude()));
-            if (!varAnnotation.generator().isEmpty()) {
-                throw new IllegalStateException("Enum vars do not support generator");
-            }
+            validateVarAnnotation(enumClass, varAnnotation);
         }
         final List<VarValueDef> varValueDefs = new ArrayList<>();
         for (final Field enumField : enumClass.getFields()) {
@@ -67,12 +71,12 @@ class EnumFieldReader {
             if ((varAnnotation != null) && Arrays.asList(varAnnotation.exclude()).contains(enumFieldName)) {
                 continue;
             }
-            final VarValueDef value = getVarValueDefForEnum(enumClass, varAnnotation, enumFieldName, conditions);
+            final VarValueDef value = getVarValueDefForEnumField(varAnnotation, enumField, conditions);
 
             varValueDefs.add(value);
         }
         if ((varAnnotation != null) && varAnnotation.nullable()) {
-            varValueDefs.add(getVarValueDefForEnum(enumClass, varAnnotation, null, conditions));
+            varValueDefs.add(getNullVarValueDefForEnum(varAnnotation, conditions));
         }
         if (!excludes.isEmpty()) {
             throw new IllegalStateException("Unknown excluded values " + excludes);
@@ -80,42 +84,149 @@ class EnumFieldReader {
         return varValueDefs;
     }
 
+    /**
+     * @throws IllegalStateException on Validation issues
+     */
+    private static void validateVarAnnotation(Class<? extends Enum<?>> enumClass, Var varAnnotation) {
+        // validate varValue annotations based on enum (must be an enum field, must not be duplicate)
+        if (!varAnnotation.generator().isEmpty()) {
+            throw new IllegalStateException("Enum vars do not support generator");
+        }
+        final Set<String> values = new HashSet<>();
+        boolean nullValueFound = false;
+        for (final Value varValue : varAnnotation.value()) {
+            try {
+                enumClass.getField(varValue.value());
+                if (varValue.isNull()) {
+                    throw new IllegalStateException("@Value value '" + varValue.value()
+                            + "' is a known key in Enum " + enumClass.getName() + " but also isNull");
+                }
+            } catch (NoSuchFieldException e) {
+                if (!varValue.isNull()) {
+                    throw new IllegalStateException("@Value value '" + varValue.value()
+                            + "' not a known key in Enum " + enumClass.getName() + " and not isNull", e);
+                }
+                if (nullValueFound) {
+                    throw new IllegalStateException("@Value value '" + varValue.value()
+                            + "' defines second null value for enum " + enumClass.getName(), e);
+                }
+                nullValueFound = true;
+            }
+            if (!values.add(varValue.value())) {
+                throw new IllegalStateException("@Value value '" + varValue.value() + "' duplicate");
+            }
+        }
+    }
+
+    /**
+     * Create a VarValue Definition based on 2 input sources, the Var annotation, and the enum definition.
+     * Example:
+     *
+     * class Foo {
+     *     @Var(value = {
+     *                 @Value(value = "A",..),
+     *         }
+     *     FooEnum x;
+     *
+     *     private static enum FooEnum {
+     *         @VarValueTemplate(...)
+     *         A,
+     *         B,
+     *         C
+     *     }
+     * }
+     */
     @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     @Nonnull
-    private static VarValueDef getVarValueDefForEnum(
-            final Class<? extends Enum<?>> enumClass,
+    private static VarValueDef getVarValueDefForEnumField(
             @Nullable final Var varAnnotation,
-            @Nullable final String enumFieldName,
+            final Field enumField,
             @Nullable final String... conditions) {
         VarValueDef value = null;
+        final String enumFieldName = enumField.getName();
+        // First try to create a value based on a field annotation with same name as enum field
         if ((varAnnotation != null) && (varAnnotation.value().length > 0)) {
-            final Set<String> values = new HashSet<>();
             for (final Value varValue : varAnnotation.value()) {
-                try {
-                    enumClass.getField(varValue.value());
-                } catch (NoSuchFieldException e) {
-                    if (!varValue.isNull()) {
-                        throw new IllegalStateException("@Value value '" + varValue.value()
-                                + "' not a known key in Enum " + enumClass.getName() + " and not isNull", e);
-                    }
-                }
-
-                if (enumFieldName == null) {
-                    value = createVarValueDef("NA", varValue, conditions, true);
-                } else if (enumFieldName.equals(varValue.value())) {
-                    value = createVarValueDef(enumFieldName, varValue, conditions, varValue.isNull());
-                    if (!values.add(varValue.value())) {
-                        throw new IllegalStateException("@Value value '" + varValue.value() + "' duplicate");
-                    }
+                if (enumFieldName.equals(varValue.value())) {
+                    value = createTemplatedVarValueDef(enumField, varValue, conditions);
+                    // assume only one varValue has same name, based on prior validation
+                    break;
                 }
             }
         }
+        // if no variable field annotation matched given enum field create based on enum field only
         if (value == null) {
-            if (enumFieldName == null) {
-                value = createNullVarValueDef(conditions);
+            value = createTemplatedVarValueDef(enumField, null, conditions);
+        }
+        return value;
+    }
+
+    @Nonnull
+    @SuppressWarnings("PMD.UseVarargs")
+    private static VarValueDef createTemplatedVarValueDef(Field enumField, @Nullable Value varValue, @Nullable String[] conditions) {
+        final @Nullable VarValueTemplate templateAnnotation = enumField.getAnnotation(VarValueTemplate.class);
+        final String name = enumField.getName();
+        if (templateAnnotation == null) {
+            if (varValue == null) {
+                return createValidVarValueDef(name, conditions);
             } else {
-                value = createValidVarValueDef(enumFieldName, conditions);
+                return createVarValueDef(name, varValue, conditions, false);
             }
+        }
+        return createTemplatedVarValueDef(templateAnnotation, name, varValue, conditions);
+    }
+
+    @SuppressWarnings("PMD.UseVarargs")
+    private static VarValueDef createTemplatedVarValueDef(VarValueTemplate templateAnnotation, String name, @Nullable Value varValue, @Nullable String[] conditions) {
+        // take defaults from enum annotation, override with VarValue settings
+        final VarValueDef.Type templateType;
+        if (templateAnnotation.type() == TestCase.Type.FAILURE) {
+            templateType = VarValueDef.Type.FAILURE;
+        } else if (templateAnnotation.once()) {
+            templateType = VarValueDef.Type.ONCE;
+        } else {
+            templateType = VarValueDef.Type.VALID;
+        }
+        final VarValueDefBuilder builder = new VarValueDefBuilder(name, varValue == null ? templateType : typeOf(varValue, templateType));
+        builder.addAnnotations(MapStringReader.parse(templateAnnotation.having()));
+        builder.addProperties(templateAnnotation.properties());
+        String[] when = null;
+        String[] whenNot = null;
+        if (varValue != null) {
+            when = varValue.when();
+            whenNot = varValue.whenNot();
+            builder.addAnnotations(MapStringReader.parse(varValue.having()));
+            builder.addProperties(varValue.properties());
+        }
+
+        if (when == null || when.length == 0) {
+            when = templateAnnotation.when();
+        }
+        if (whenNot == null || whenNot.length == 0) {
+            whenNot = templateAnnotation.whenNot();
+        }
+        builder.condition(getCondition(conditions, when, whenNot));
+        return builder.build();
+    }
+
+    @Nonnull
+    private static VarValueDef getNullVarValueDefForEnum(
+            @Nullable final Var varAnnotation,
+            @Nullable final String... conditions) {
+        VarValueDef value = null;
+        // First try to create a value based on a field annotation with same name as enum field
+        if ((varAnnotation != null) && (varAnnotation.value().length > 0)) {
+            for (final Value varValue : varAnnotation.value()) {
+                // assume only one varValue is Null, based on prior validation
+                if (varValue.isNull()) {
+                    value = createVarValueDef("NA", varValue, conditions, true);
+                    break;
+                }
+            }
+        }
+        // if no variable field annotation matched given enum field create based on enum field only
+        if (value == null) {
+            value = createNullVarValueDef(conditions);
         }
         return value;
     }

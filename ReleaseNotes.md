@@ -3,6 +3,7 @@
 ## 0.0.2-SNAPSHOT
 
 * generator ref: reference method that provides values for variable
+* Feature: Allow annotating enum values for varvalue defaults
 
 ## 0.0.1
 

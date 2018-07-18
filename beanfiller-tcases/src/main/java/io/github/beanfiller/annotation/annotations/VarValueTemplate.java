@@ -23,12 +23,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Container annotation single value for a variable within a @Var annotation.
- * Can be used on Fields of Type Enum, String, Boolean (Maybe more in the future).
+ * Annotates an enum field with default settings when this field is used as a VarValue
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DefaultValue {
+public @interface VarValueTemplate {
 
     TestCase.Type type() default TestCase.Type.SUCCESS;
 
@@ -48,7 +47,7 @@ public @interface DefaultValue {
     String[] whenNot() default {};
 
     /**
-     * hint to use this value only once in all vaid testcases
+     * hint to use this value only once in all valid testcases
      */
     boolean once() default false;
 

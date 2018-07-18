@@ -3,13 +3,13 @@
 My list of ideas to implement... pull requests welcome.
 
 * For 0.0.2 Release
-  * Feature: Allow annotating enum values for varvalue defaults
   * Feature: properly support bean getters/setters (Consider Jackson-databind?)
-  * Feature: Consider Var ranges for numbers, times, dates, ...?
+  * Feature: support Lists of primitives
   * Design: Generator configuration inside FunctionInputDef (In particular for Combine)?
     * Design: Generator Combiners from input def
 
 * High priority
+  * Feature: Consider Var ranges for numbers, times, dates, ...?
   * Feature: Support special non-primitives (Locale, Currency?)
   * Feature: Consider Var ranges for numbers, times, dates, ...?
   * Documentation: full test example

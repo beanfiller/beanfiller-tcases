@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import static io.github.beanfiller.annotation.internal.reader.BooleanFieldReader.readVarValueDefsForBoolean;
-import static io.github.beanfiller.annotation.internal.reader.EnumFieldReader.readVarValueDefsForEnumField;
+import static io.github.beanfiller.annotation.internal.reader.EnumFieldReader.readVarValueDefsForEnumFields;
 import static io.github.beanfiller.annotation.internal.reader.ValueUtil.createNullVarValueDef;
 import static io.github.beanfiller.annotation.internal.reader.ValueUtil.createVarValueDef;
 import static java.util.Collections.emptyList;
@@ -57,7 +57,7 @@ class VarValueDefReader {
             if ((field.getType() == Boolean.class) || (field.getType() == boolean.class)) {
                 varValueDefs = readVarValueDefsForBoolean(varAnnotation, (field.getType() == Boolean.class) && ((varAnnotation == null) || varAnnotation.nullable()), conditions);
             } else if (field.getType().isEnum()) {
-                varValueDefs = readVarValueDefsForEnumField((Class<? extends Enum<?>>) field.getType(), varAnnotation, conditions);
+                varValueDefs = readVarValueDefsForEnumFields((Class<? extends Enum<?>>) field.getType(), varAnnotation, conditions);
             } else {
                 if (field.getType().isPrimitive()) {
                     varValueDefs = getVarValuesNumbersStringPrimitive(field, varAnnotation, conditions, false);

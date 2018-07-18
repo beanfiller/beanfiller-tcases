@@ -32,7 +32,7 @@ class ValueUtil {
 
     @Nonnull
     static VarValueDef createVarValueDef(String name, Value varValue, @Nullable String[] conditions, boolean isNull) {
-        final VarValueDefBuilder builder = new VarValueDefBuilder(name, typeOf(varValue));
+        final VarValueDefBuilder builder = new VarValueDefBuilder(name, typeOf(varValue, VarValueDef.Type.VALID));
         builder.addAnnotations(MapStringReader.parse(varValue.having()));
         builder.addProperties(varValue.properties());
         builder.condition(getCondition(conditions, varValue.when(), varValue.whenNot()));
@@ -61,13 +61,13 @@ class ValueUtil {
      * returns the Tcases Type given attributes of a Value annotation.
      */
     @Nonnull
-    static VarValueDef.Type typeOf(Value varValue) {
+    static VarValueDef.Type typeOf(Value varValue, VarValueDef.Type defaultType) {
         if (varValue.type() == TestCase.Type.FAILURE) {
             return VarValueDef.Type.FAILURE;
         }
         if (varValue.once()) {
             return VarValueDef.Type.ONCE;
         }
-        return VarValueDef.Type.VALID;
+        return defaultType;
     }
 }

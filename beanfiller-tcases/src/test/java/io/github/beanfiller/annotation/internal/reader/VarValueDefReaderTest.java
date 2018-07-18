@@ -18,6 +18,7 @@ package io.github.beanfiller.annotation.internal.reader;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.beanfiller.annotation.annotations.Value;
 import io.github.beanfiller.annotation.annotations.Var;
+import io.github.beanfiller.annotation.annotations.VarValueTemplate;
 import org.apache.commons.collections4.IteratorUtils;
 import org.cornutum.tcases.PropertySet;
 import org.cornutum.tcases.TestCase;
@@ -39,9 +40,40 @@ public class VarValueDefReaderTest {
 
     @Test
     public void testReadVarValueDefsString() throws Exception {
+        class StringSamples {
+            public String invalidNoVar;
+
+            @Var
+            public String invalidNoValue;
+
+            @Var(@Value("foo"))
+            public String aStringWithVar1Value;
+
+            @Var(value = @Value("foo"), nullable = false)
+            public String aStringWithVar1ValueNullable;
+
+            @Var({
+                    @Value(value = "foo",
+                            properties = {"fooProp"},
+                            once = true,
+                            when = "fooWhen",
+                            having = "fooHasKey:fooHasValue"),
+                    @Value(value = "bar",
+                            properties = {"barProp"},
+                            whenNot = "fooWhen",
+                            type = TestCase.Type.FAILURE,
+                            having = "barHasKey:barHasValue")
+            })
+            public String aStringWithVar2Value;
+
+            @Var({@Value(value = "fail", once = true, type = TestCase.Type.FAILURE)})
+            public String aStringOnceFailure;
+
+            @Var({@Value("fail"), @Value("fail")})
+            public String invalidDuplicate;
+        }
+
         final Class<StringSamples> fieldSamplesClass = StringSamples.class;
-
-
 
         assertThatThrownBy(() -> getVarValueDefs("invalidNoVar", fieldSamplesClass, (String) null))
                 .isInstanceOf(IllegalStateException.class);
@@ -92,43 +124,49 @@ public class VarValueDefReaderTest {
     }
 
 
-    private static class StringSamples {
-        public String invalidNoVar;
-
-        @Var
-        public String invalidNoValue;
-
-        @Var(@Value("foo"))
-        public String aStringWithVar1Value;
-
-        @Var(value = @Value("foo"), nullable = false)
-        public String aStringWithVar1ValueNullable;
-
-        @Var({
-                @Value(value = "foo",
-                        properties = {"fooProp"},
-                        once = true,
-                        when = "fooWhen",
-                        having = "fooHasKey:fooHasValue"),
-                @Value(value = "bar",
-                        properties = {"barProp"},
-                        whenNot = "fooWhen",
-                        type = TestCase.Type.FAILURE,
-                        having = "barHasKey:barHasValue")
-        })
-        public String aStringWithVar2Value;
-
-        @Var({@Value(value = "fail", once = true, type = TestCase.Type.FAILURE)})
-        public String aStringOnceFailure;
-
-        @Var({@Value("fail"), @Value("fail")})
-        public String invalidDuplicate;
-    }
-
-
-
     @Test
     public void testReadVarValueDefsBoolean() throws Exception {
+        class BooleanFieldSamples {
+
+            public boolean aPrimitiveBoolean;
+
+            public Boolean aBoolean;
+
+            @Var
+            public Boolean aBooleanWithVar;
+
+            @Var(@Value("true"))
+            public Boolean aBooleanWithVar1Value;
+
+            @Var(value = @Value("true"), nullable = false)
+            public Boolean aBooleanWithVar1ValueNotNullable;
+
+            @Var(nullable = false)
+            public Boolean aBooleanWithVar1ValueExclude0;
+
+            @Var({
+                    @Value(value = "true",
+                            properties = {"trueProp"},
+                            once = true,
+                            when = "trueWhen",
+                            having = "trueHasKey:trueHasValue"),
+                    @Value(value = "false",
+                            properties = {"falseProp"},
+                            whenNot = "trueWhen",
+                            type = TestCase.Type.FAILURE,
+                            having = "falseHasKey:falseHasValue")
+            })
+            public Boolean aBooleanWithVar2Value;
+
+            @Var({@Value(value = "true", once = true, type = TestCase.Type.FAILURE)})
+            public Boolean aBooleanOnceFailure;
+
+            @Var({@Value("true"), @Value("true")})
+            public Boolean invalidDuplicate;
+
+            @Var({@Value("unknown")})
+            public Boolean invalidUnknown;
+        }
         final Class<BooleanFieldSamples> fieldSamplesClass = BooleanFieldSamples.class;
         assertThat(getVarValueDefs("aBoolean", fieldSamplesClass, (String) null))
                 .hasSize(3);
@@ -182,50 +220,50 @@ public class VarValueDefReaderTest {
     }
 
 
-    private static class BooleanFieldSamples {
 
-        public boolean aPrimitiveBoolean;
-
-        public Boolean aBoolean;
-
-        @Var
-        public Boolean aBooleanWithVar;
-
-        @Var(@Value("true"))
-        public Boolean aBooleanWithVar1Value;
-
-        @Var(value = @Value("true"), nullable = false)
-        public Boolean aBooleanWithVar1ValueNotNullable;
-
-        @Var(nullable = false)
-        public Boolean aBooleanWithVar1ValueExclude0;
-
-        @Var({
-                @Value(value = "true",
-                        properties = {"trueProp"},
-                        once = true,
-                        when = "trueWhen",
-                        having = "trueHasKey:trueHasValue"),
-                @Value(value = "false",
-                        properties = {"falseProp"},
-                        whenNot = "trueWhen",
-                        type = TestCase.Type.FAILURE,
-                        having = "falseHasKey:falseHasValue")
-        })
-        public Boolean aBooleanWithVar2Value;
-
-        @Var({@Value(value = "true", once = true, type = TestCase.Type.FAILURE)})
-        public Boolean aBooleanOnceFailure;
-
-        @Var({@Value("true"), @Value("true")})
-        public Boolean invalidDuplicate;
-
-        @Var({@Value("unknown")})
-        public Boolean invalidUnknown;
-    }
 
     @Test
     public void testReadVarValueDefsInteger() throws Exception {
+        class IntegerFieldSamples {
+
+            @Var({@Value("1"), @Value("2")})
+            public int aPrimitiveInteger;
+
+            @Var({@Value("1"), @Value("2")})
+            public Integer anInteger;
+
+            @Var({@Value("1"), @Value("2")})
+            public Integer anIntegerWithVar;
+
+            @Var({@Value("1"), @Value("2")})
+            public Integer anIntegerWithVar1Value;
+
+            @Var(value = {@Value("1"), @Value("2")}, nullable = false)
+            public Integer anIntegerWithVar1ValueNotNullable;
+
+            @Var({
+                    @Value(value = "1",
+                            properties = {"trueProp"},
+                            once = true,
+                            when = "trueWhen",
+                            having = "trueHasKey:trueHasValue"),
+                    @Value(value = "2",
+                            properties = {"falseProp"},
+                            whenNot = "trueWhen",
+                            type = TestCase.Type.FAILURE,
+                            having = "falseHasKey:falseHasValue")
+            })
+            public Integer anIntegerWithVar2Value;
+
+            @Var({@Value(value = "1", once = true, type = TestCase.Type.FAILURE), @Value("2")})
+            public Integer anIntegerOnceFailure;
+
+            @Var({@Value("1"), @Value("1")})
+            public Integer invalidDuplicate;
+
+            @Var({@Value(value = "unknown", isNull = true), @Value(value = "unknown2", isNull = true)})
+            public Integer invalidDuplicateNull;
+        }
         final Class<IntegerFieldSamples> fieldSamplesClass = IntegerFieldSamples.class;
         assertThat(getVarValueDefs("anInteger", fieldSamplesClass, (String) null))
                 .hasSize(3);
@@ -277,53 +315,54 @@ public class VarValueDefReaderTest {
     }
 
 
-    private static class IntegerFieldSamples {
 
-        @Var({@Value("1"), @Value("2")})
-        public int aPrimitiveInteger;
-
-        @Var({@Value("1"), @Value("2")})
-        public Integer anInteger;
-
-        @Var({@Value("1"), @Value("2")})
-        public Integer anIntegerWithVar;
-
-        @Var({@Value("1"), @Value("2")})
-        public Integer anIntegerWithVar1Value;
-
-        @Var(value = {@Value("1"), @Value("2")}, nullable = false)
-        public Integer anIntegerWithVar1ValueNotNullable;
-
-        @Var({
-                @Value(value = "1",
-                        properties = {"trueProp"},
-                        once = true,
-                        when = "trueWhen",
-                        having = "trueHasKey:trueHasValue"),
-                @Value(value = "2",
-                        properties = {"falseProp"},
-                        whenNot = "trueWhen",
-                        type = TestCase.Type.FAILURE,
-                        having = "falseHasKey:falseHasValue")
-        })
-        public Integer anIntegerWithVar2Value;
-
-        @Var({@Value(value = "1", once = true, type = TestCase.Type.FAILURE), @Value("2")})
-        public Integer anIntegerOnceFailure;
-
-        @Var({@Value("1"), @Value("1")})
-        public Integer invalidDuplicate;
-
-        @Var({@Value(value = "unknown", isNull = true), @Value(value = "unknown2", isNull = true)})
-        public Integer invalidDuplicateNull;
-    }
 
     @Test
-    public void testReadVarValueDefsEnum() throws Exception {
+    public void testReadVarValueDefsEnumSimple() throws Exception {
+        class EnumFieldSamples {
+
+            public Enum0Sample enum0Field;
+            public Enum1Sample enum1Field;
+            public Enum3Sample enum3Field;
+
+            @Var
+            public Enum3Sample enum3FieldVar;
+
+            @Var(@Value(value = "NA", isNull = true))
+            public Enum3Sample enum3FieldVarWithNull;
+
+            @Var(nullable = false)
+            public Enum3Sample enum3FieldVarNotNullable;
+
+            @Var({
+                    @Value(value = "A1",
+                            properties = {"a1Prop"},
+                            once = true,
+                            when = "aWhen",
+                            having = "a1HasKey:a1HasValue"),
+                    @Value(value = "A2",
+                            properties = {"a2Prop"},
+                            type = TestCase.Type.FAILURE,
+                            whenNot = "aWhen",
+                            having = "a2HasKey:a2HasValue")}
+            )
+            public Enum3Sample enum3FieldVarFull;
+            @Var({@Value(value = "A1", once = true, type = TestCase.Type.FAILURE)})
+            public Enum1Sample anEnumOnceFailure;
+            @Var({@Value("A1"), @Value("A1")})
+            public Enum3Sample invalidDuplicate;
+            @Var({@Value(value = "A1", isNull = true)})
+            public Enum3Sample invalidValueAndNull;
+            @Var({@Value(value = "NA1", isNull = true), @Value(value = "NA2", isNull = true)})
+            public Enum3Sample invalidDuplicateNull;
+            @Var({@Value("A4")})
+            public Enum3Sample invalidUnknown;
+        }
+
         final Class<EnumFieldSamples> fieldSamplesClass = EnumFieldSamples.class;
 
         assertThatThrownBy(() -> getVarValueDefs("enum0Field", fieldSamplesClass, (String) null))
-            .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class);
 
         assertThat(getVarValueDefs("enum1Field", fieldSamplesClass, (String) null))
                 .hasSize(1);
@@ -336,17 +375,44 @@ public class VarValueDefReaderTest {
         assertThat(getVarValueDefs("enum3FieldVarNotNullable", fieldSamplesClass, (String) null))
                 .hasSize(3);
 
+
+        assertThatThrownBy(() -> getVarValueDefs("invalidDuplicate", fieldSamplesClass, (String) null))
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThatThrownBy(() -> getVarValueDefs("invalidValueAndNull", fieldSamplesClass, (String) null))
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThatThrownBy(() -> getVarValueDefs("invalidDuplicateNull", fieldSamplesClass, (String) null))
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThatThrownBy(() -> getVarValueDefs("invalidUnknown", fieldSamplesClass, (String) null))
+                .isInstanceOf(IllegalStateException.class);
+
         final List<VarValueDef> aEnumOnceFailure = getVarValueDefs("anEnumOnceFailure", fieldSamplesClass, (String) null);
         assertThat(aEnumOnceFailure).hasSize(2);
         assertThat(aEnumOnceFailure.get(0).getType()).isEqualTo(VarValueDef.Type.FAILURE);
+    }
 
+    @Test
+    public void testReadVarValueDefsEnumWithVarValueDef() throws Exception {
+        class EnumFieldSamples {
+            public TemplatedEnum2Sample templatedEnum4Field;
 
-        assertThatThrownBy(() -> getVarValueDefs("invalidDuplicate", fieldSamplesClass, (String) null))
-            .isInstanceOf(IllegalStateException.class);
-
-        assertThatThrownBy(() -> getVarValueDefs("invalidUnknown", fieldSamplesClass, (String) null))
-            .isInstanceOf(IllegalStateException.class);
-
+            @Var({
+                    @Value(value = "A1",
+                            properties = {"a1Prop"},
+                            once = true,
+                            when = "aWhen",
+                            having = "a1HasKey:a1HasValue"),
+                    @Value(value = "A2",
+                            properties = {"a2Prop"},
+                            type = TestCase.Type.FAILURE,
+                            whenNot = "aWhen",
+                            having = "a2HasKey:a2HasValue")}
+            )
+            public Enum3Sample enum3FieldVarFull;
+        }
+        final Class<EnumFieldSamples> fieldSamplesClass = EnumFieldSamples.class;
         final List<VarValueDef> aEnumWithVar2Value
                 = getVarValueDefs("enum3FieldVarFull", fieldSamplesClass, (String) null);
         assertThat(aEnumWithVar2Value).hasSize(4);
@@ -381,51 +447,69 @@ public class VarValueDefReaderTest {
         assertTrue(a3Value.getCondition().satisfied(new PropertySet("aWhen")));
     }
 
-    private static class EnumFieldSamples {
+    @Test
+    public void testReadVarValueDefsEnumTemplated() throws Exception {
+        class EnumFieldSamples {
+            public TemplatedEnum2Sample templatedEnum4Field;
 
-        public Enum0Sample enum0Field;
-        public Enum1Sample enum1Field;
-        public Enum3Sample enum3Field;
-
-        @Var
-        public Enum3Sample enum3FieldVar;
-
-        @Var(@Value(value = "NA", isNull = true))
-        public Enum3Sample enum3FieldVarWithNull;
-
-        @Var(nullable = false)
-        public Enum3Sample enum3FieldVarNotNullable;
-
-        @Var({
-                @Value(value = "A1",
-                        properties = {"a1Prop"},
-                        once = true,
-                        when = "aWhen",
-                        having = "a1HasKey:a1HasValue"),
-                @Value(value = "A2",
-                        properties = {"a2Prop"},
-                        type = TestCase.Type.FAILURE,
-                        whenNot = "aWhen",
-                        having = "a2HasKey:a2HasValue")}
-        )
-        public Enum3Sample enum3FieldVarFull;
-        @Var({@Value(value = "A1", once = true, type = TestCase.Type.FAILURE)})
-        public Enum1Sample anEnumOnceFailure;
-        @Var({@Value("A1"), @Value("A1")})
-        public Enum3Sample invalidDuplicate;
-        @Var({@Value("A4")})
-        public Enum3Sample invalidUnknown;
-
-        public enum Enum0Sample {
+            @Var(value = {@Value("A1")}, nullable = false)
+            public TemplatedEnum2Sample templatedEnum4VarField;
+            @Var({
+                    @Value("A1"),
+                    @Value("A2")
+            })
+            public TemplatedEnum2Sample templatedEnum5VarField;
         }
+        final Class<EnumFieldSamples> fieldSamplesClass = EnumFieldSamples.class;
+        assertThat(getVarValueDefs("templatedEnum4Field", fieldSamplesClass, (String) null))
+                .hasSize(3);
 
-        public enum Enum1Sample {
-            A1
-        }
+        final List<VarValueDef> templatedEnum4VarFieldValues
+                = getVarValueDefs("templatedEnum4VarField", fieldSamplesClass, (String) null);
+        assertThat(templatedEnum4VarFieldValues).hasSize(3);
 
-        public enum Enum3Sample {
-            A1, A2, A3
-        }
+        final List<VarValueDef> templatedEnum5VarFieldValues
+                = getVarValueDefs("templatedEnum5VarField", fieldSamplesClass, (String) null);
+        assertThat(templatedEnum5VarFieldValues).hasSize(4);
+        final VarValueDef templatedA1Value = templatedEnum5VarFieldValues.get(0);
+        final VarValueDef templatedA2Value = templatedEnum5VarFieldValues.get(1);
+        final VarValueDef templatedA3Value = templatedEnum5VarFieldValues.get(2);
+        final VarValueDef templatedA4Value = templatedEnum5VarFieldValues.get(3);
+        assertThat(templatedA1Value.getType()).isEqualTo(VarValueDef.Type.FAILURE);
+        assertThat(templatedA2Value.getType()).isEqualTo(VarValueDef.Type.ONCE);
+        assertThat(templatedA3Value.getType()).isEqualTo(VarValueDef.Type.FAILURE);
+        assertThat(templatedA4Value.getType()).isEqualTo(VarValueDef.Type.VALID);
+
+        assertFalse(templatedA1Value.getProperties().contains("a3Prop"));
+        assertFalse(templatedA2Value.getProperties().contains("a3Prop"));
+        assertTrue(templatedA3Value.getProperties().contains("a3Prop"));
+
+        final List<String> a1Annotations = IteratorUtils.toList(templatedA3Value.getAnnotations());
+        assertThat(a1Annotations).isEqualTo(Arrays.asList("a3HasKey"));
+        assertThat(templatedA3Value.getAnnotation("a3HasKey")).isEqualTo("a3HasValue");
+    }
+
+    public enum Enum0Sample {
+    }
+
+    public enum Enum1Sample {
+        A1
+    }
+
+    public enum Enum3Sample {
+        A1, A2, A3
+    }
+
+    public enum TemplatedEnum2Sample {
+        @VarValueTemplate(type = TestCase.Type.FAILURE)
+        A1,
+        @VarValueTemplate(once = true)
+        A2,
+        @VarValueTemplate(properties = {"a3Prop"},
+                type = TestCase.Type.FAILURE,
+                whenNot = "a3When",
+                having = "a3HasKey:a3HasValue")
+        A3
     }
 
 

@@ -15,6 +15,7 @@ limitations under the License.
 
 package io.github.beanfiller.annotation.sample.find;
 
+import io.github.beanfiller.annotation.annotations.VarValueTemplate;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import io.github.beanfiller.annotation.creator.AbstractTestInput;
 import io.github.beanfiller.annotation.annotations.FunctionDef;
@@ -129,12 +130,9 @@ public class FindTestInput extends AbstractTestInput {
         public CardinalityZeroToN size;
 
         @Var(value = {
-                @Value(value = "YES", properties = PATTERN_QUOTED, whenNot = PATTERN_EMPTY),
+                @Value(value = "YES", whenNot = PATTERN_EMPTY),
                 @Value(value = "NO", whenNot = PATTERN_EMPTY),
-                @Value(value = "UNTERMINATED",
-                        type = FAILURE,
-                        whenNot = PATTERN_EMPTY,
-                        having = "failure:QuoteMismatch")
+                @Value(value = "UNTERMINATED", whenNot = PATTERN_EMPTY)
         }, nullable = false)
         public QuotedType quoted;
 
@@ -149,8 +147,10 @@ public class FindTestInput extends AbstractTestInput {
         public CardinalityZeroToN embeddedQuotes;
 
         public enum QuotedType {
+            @VarValueTemplate(properties = PATTERN_QUOTED)
             YES,
             NO,
+            @VarValueTemplate(type = FAILURE, having = "failure:QuoteMismatch")
             UNTERMINATED;
         }
 
