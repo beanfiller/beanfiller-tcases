@@ -36,5 +36,5 @@ public @interface VarSet {
 
     String[] having() default {};
 
-    boolean nullable() default true; // on a nullable field, do not generate null testcase
+    boolean nullable() default true; // on a nullable field, do not generate null testcase unless conditions force it
 }
