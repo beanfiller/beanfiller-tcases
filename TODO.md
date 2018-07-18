@@ -7,10 +7,12 @@ My list of ideas to implement... pull requests welcome.
   * Feature: Allow annotating enum values for varvalue defaults
   * Feature: properly support bean getters/setters (Consider Jackson-databind?)
   * Design: Value generator method reference for vars with many values.
-  * Feature: Support special non-primitives (Locale, Currency?)
   * Feature: Consider Var ranges for numbers, times, dates, ...?
+  * Design: Generator configuration inside FunctionInputDef (In particular for Combine)?
+    * Design: Generator Combiners from input def
 
 * High priority
+  * Feature: Support special non-primitives (Locale, Currency?)
   * Design: Same type but different / interrelated values (testtime?)
   * Test: Customizable AnnotationsReaders and Type Emitters
     * Design: Annotate Value with BoundaryValueEnum and generator?
@@ -24,8 +26,8 @@ My list of ideas to implement... pull requests welcome.
     * simple getter Methods to call after instantiation (lazy, no ordering)
     * Single PostGeneration method to call after instantiation (nested?)
   * Design: Persist (expected) values for combinations of tests
+  * Design: Create Testcase reports in Excel
   * Bug: check output annotation duplication for nested VarDef (bug?)
-  * Design: Require each non-static field to have one Tcases annotation (Var, VarSet, TestCaseId, IsFailure)?
   * Feature: Create more test examples:
     * Triangle
     * Shop cart checkout
@@ -35,8 +37,7 @@ My list of ideas to implement... pull requests welcome.
     * Authorization example from doc
     * ATM withdraw
     * Restassured/spring? example
-  * Design: Generator configuration inside FunctionInputDef (In particular for Combine)?
-    * Design: Generator Combiners from input def
+    * JSoup Spring Thymeleaf example
   * Design: More reusable BoundaryValueCategory enums
   * Feature: Use beanfillers-annotations without tcases on the compile classpath
   * Design: custom VarDef / VarSet subclasses for reflection access?
