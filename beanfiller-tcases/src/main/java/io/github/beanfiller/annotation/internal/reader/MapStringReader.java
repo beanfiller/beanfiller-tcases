@@ -16,9 +16,14 @@ limitations under the License.
 package io.github.beanfiller.annotation.internal.reader;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
+
+import static java.io.StreamTokenizer.TT_EOF;
+import static java.io.StreamTokenizer.TT_WORD;
 
 /**
  * For Strings defining a Map&lt;String, String&gt;, defines a parser to read values
@@ -35,21 +40,40 @@ public class MapStringReader {
     }
 
     @Nonnull
+    @SuppressWarnings("PMD.PrematureDeclaration")
     static Map<String, String> parseHasValues(String havingString) {
         final Map<String, String> map = new HashMap<>();
-        final StringTokenizer tokenizer = new StringTokenizer(havingString, ",");
-        // TODO: Deal with quoting and escaping for values with comma, allowed in Tcases?
-        while (tokenizer.hasMoreTokens()) {
-            final String next = tokenizer.nextToken();
-            final int equalsPos = next.indexOf(':');
-            if (equalsPos <= 0) {
-                throw new IllegalStateException("Having expression must have a colon: '" + next + '\'');
+        // Stream Tokenizer has confusing API, but seems easiest to parse csv including quote handling
+        final StreamTokenizer tokenizer = new StreamTokenizer(new StringReader(havingString));
+        // default settings makes tokenizer parser numbers
+        tokenizer.resetSyntax();
+        tokenizer.wordChars(' ', '9');
+        tokenizer.wordChars(';', '~');
+        tokenizer.quoteChar('"');
+        tokenizer.ordinaryChars(',', ',');
+        try {
+            int nextToken = tokenizer.nextToken();
+            while (nextToken != TT_EOF) {
+                final String key = tokenizer.sval;
+                if (tokenizer.nextToken() != ':') {
+                    throw new IllegalStateException("Having expression must have a colon: '" + havingString + '\'');
+                }
+                final int wordOrQuote = tokenizer.nextToken();
+                if (wordOrQuote != TT_WORD && wordOrQuote != '"') {
+                    throw new IllegalStateException("Having expression must have a value after colon: '" + havingString + '\'');
+                }
+                final String value = tokenizer.sval;
+                if (map.put(key, value) != null) {
+                    throw new IllegalStateException("Duplicate key: '" + key + '\'');
+                }
+                nextToken = tokenizer.nextToken();
+                if (nextToken != ',' && nextToken != TT_EOF) {
+                    throw new IllegalStateException("Having expression must be comma-separated: '" + havingString + '\'');
+                }
+                nextToken = tokenizer.nextToken();
             }
-            final String key = next.substring(0, equalsPos);
-            final String value = next.substring(equalsPos + 1);
-            if (map.put(key, value) != null) {
-                throw new IllegalStateException("Duplicate key: '" + key + '\'');
-            }
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot read arguments from " + havingString, e);
         }
         return map;
     }

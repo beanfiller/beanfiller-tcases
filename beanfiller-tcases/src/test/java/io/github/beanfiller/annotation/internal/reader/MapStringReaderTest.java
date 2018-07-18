@@ -22,17 +22,34 @@ import java.util.AbstractMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.github.beanfiller.annotation.internal.reader.MapStringReader.parseHasValues;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static io.github.beanfiller.annotation.internal.reader.MapStringReader.parseHasValues;
 
 
 public class MapStringReaderTest {
 
     @Test
     public void testParse() {
-        assertThat(MapStringReader.parse(new String[]{})).isEmpty();
-        assertThat(MapStringReader.parse(new String[]{"foo:bar"})).containsEntry("foo", "bar");
+        assertThat(MapStringReader.parse()).isEmpty();
+        assertThat(MapStringReader.parse("foo:bar")).containsEntry("foo", "bar");
+        assertThat(MapStringReader.parse("foo:42")).containsEntry("foo", "42");
+        assertThat(MapStringReader.parse("foo_1-2.3:bar!?")).containsEntry("foo_1-2.3", "bar!?");
+        assertThat(MapStringReader.parse("foo:bar,foo2:bar2"))
+                .containsEntry("foo", "bar")
+                .containsEntry("foo2", "bar2");
+        assertThat(MapStringReader.parse("foo:bar", "foo2:bar2"))
+                .containsEntry("foo", "bar")
+                .containsEntry("foo2", "bar2");
+        assertThat(MapStringReader.parse("foo:ばる"))
+                .containsEntry("foo", "ばる");
+    }
+
+    @Test
+    public void testParseQuoted() {
+        assertThat(MapStringReader.parse()).isEmpty();
+        assertThat(MapStringReader.parse("foo:\"bar, foo2:bar2\"")).containsEntry("foo", "bar, foo2:bar2");
+        assertThat(MapStringReader.parse("foo:\"bar \\\"quoted\\\"")).containsEntry("foo", "bar \"quoted\"");
     }
 
     @Test
@@ -45,8 +62,27 @@ public class MapStringReaderTest {
                         new AbstractMap.SimpleEntry<>("a2", "b2"))
                         .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
 
-        assertThatThrownBy(() -> parseHasValues("a,")).isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> parseHasValues("a:1,a:2")).isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> parseHasValues("a:1,a:2:3")).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> parseHasValues("a"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("colon");
+        assertThatThrownBy(() -> parseHasValues("a,"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("colon");
+        assertThatThrownBy(() -> parseHasValues("a:"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("value after colon");
+        assertThatThrownBy(() -> parseHasValues("a:,"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("value after colon");
+        assertThatThrownBy(() -> parseHasValues("a::"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("value after colon");;
+        assertThatThrownBy(() -> parseHasValues("a:1:"))
+                .isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> parseHasValues("a:1,a:2"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Duplicate");;
+        assertThatThrownBy(() -> parseHasValues("a:1,a:2:3"))
+                .isInstanceOf(IllegalStateException.class);
     }
 }
