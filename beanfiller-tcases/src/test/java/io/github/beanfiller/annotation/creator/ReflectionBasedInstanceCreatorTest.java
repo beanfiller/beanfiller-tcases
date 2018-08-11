@@ -115,7 +115,7 @@ public class ReflectionBasedInstanceCreatorTest {
 
         @Override
         public void setFieldValueAs(@Nonnull final String varname, @Nonnull final Object instance, @Nonnull final VarBinding varBinding) {
-            setFieldValue(instance, varname, LocalDate.parse(varBinding.getValue()));
+            setFieldValue(instance, varname, LocalDate.parse((String) varBinding.getValue()));
         }
     }
 

@@ -51,14 +51,14 @@ public class SystemTestDefWriterTest {
         assertThat(xml)
                 .contains("<TestCases system=\"fooSystem\">")
                 .contains("<Function name=\"functionFooName\">")
-                .contains("<Var name=\"fooVar\" value=\"true\"/>")
-                .contains("<Var name=\"fooVar\" value=\"false\"/>")
-                .contains("<Var name=\"fooVar\" NA=\"true\"/>")
-                .contains("<Var name=\"stringVar\" value=\"foo\"/>")
-                .contains("<Var name=\"stringVar\" NA=\"true\"/>")
-                .contains("<Var name=\"enumVar\" value=\"REJECT_EXTENDED_RANGES\"/>")
-                .contains("<Var name=\"enumVar\" value=\"MAP_EXTENDED_RANGES\"/>")
-                .contains("<Var name=\"enumVar\" NA=\"true\"/>");
+                .contains("<Var name=\"fooVar\" value=\"true\">")
+                .contains("<Var name=\"fooVar\" value=\"false\">")
+                .contains("<Var NA=\"true\" name=\"fooVar\">")
+                .contains("<Var name=\"stringVar\" value=\"foo\">")
+                .contains("<Var NA=\"true\" name=\"stringVar\">")
+                .contains("<Var name=\"enumVar\" value=\"REJECT_EXTENDED_RANGES\">")
+                .contains("<Var name=\"enumVar\" value=\"MAP_EXTENDED_RANGES\">")
+                .contains("<Var NA=\"true\" name=\"enumVar\">");
 
         assertThatThrownBy(() -> new SystemTestDefWriterFailingStub().createSystemDefXML(fooSystem))
                 .isInstanceOf(RuntimeException.class)
@@ -86,11 +86,7 @@ public class SystemTestDefWriterTest {
     private static final class SystemTestDefWriterFailingStub extends SystemTestDefWriter {
         static final SystemTestDocWriter WRITER_MOCK = mock(SystemTestDocWriter.class);
         static {
-            try {
-                doThrow(new IOException("Test stub exception")).when(WRITER_MOCK).flush();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            doThrow(new RuntimeException("Test stub exception", new IOException("Stub cause"))).when(WRITER_MOCK).flush();
         }
         @Override
         SystemTestDocWriter createSysDocWriter(OutputStream outStream) {

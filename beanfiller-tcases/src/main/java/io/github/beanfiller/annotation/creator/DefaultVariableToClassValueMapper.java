@@ -63,11 +63,15 @@ public class DefaultVariableToClassValueMapper implements VariableToClassValueMa
     @Override
     public void setFieldValueAs(final String varname, final Object instance, final VarBinding varBinding) {
         final FieldWrapper targetField = getField(instance.getClass(), varname);
-        final Object value = getClassValueAs(varBinding.getValue(), targetField.getType());
-        if (value != null) {
-            setFieldValue(instance, varname, value);
+        final Object rawValue = varBinding.getValue();
+        if (rawValue instanceof String) {
+            final Object value = getClassValueAs((String) rawValue, targetField.getType());
+            if (value != null) {
+                setFieldValue(instance, varname, value);
+            }
+        } else if (rawValue != null) {
+            setFieldValue(instance, varname, rawValue);
         }
-
     }
 
     /**

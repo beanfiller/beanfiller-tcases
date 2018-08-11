@@ -10,7 +10,7 @@ interface ToolVersions {
     static checkstyle = '8.10.1'
     static pmd = '6.4.0'
     static spotbugsPlugin = '1.6.0'
-    static spotbugs = '3.1.6'
+    static spotbugs = '3.1.10'
     static errorProne = '2.3.1'
     static jacocoPlugin = '0.4.0'
     static errorPronePlugin = '0.0.14'
@@ -25,9 +25,9 @@ interface Versions {
     static slf4j = '1.7.25'
 
     static junit4 = '4.12'
-    static junit5 = '5.2.0'
+    static junit5 = '5.3.2'
     static testng = '6.14.3'
-    static mockito = '2.21.0'
+    static mockito = '2.23.4'
     static powermock = '1.7.4'
     static hamcrest = '1.3'
 }
@@ -35,11 +35,11 @@ interface Versions {
 
 interface Libraries {
 
-    static commons_lang3 = "org.apache.commons:commons-lang3:3.7"
-    static commons_coll4 = "org.apache.commons:commons-collections4:4.1"
-    static commons_io = "commons-io:commons-io:2.4"
+    static commons_lang3 = "org.apache.commons:commons-lang3:3.8.1"
+    static commons_coll4 = "org.apache.commons:commons-collections4:4.2"
+    static commons_io = "commons-io:commons-io:2.6"
 
-    static tcases = "org.cornutum.tcases:tcases-lib:2.0.0"
+    static tcases = "org.cornutum.tcases:tcases-lib:2.1.2"
 
     static jsr305 = "com.google.code.findbugs:jsr305:${Versions.jsr305}"
     static spotbugsAnnotations = "com.github.spotbugs:spotbugs-annotations:${ToolVersions.spotbugs}"
@@ -53,7 +53,7 @@ interface Libraries {
     static junit4 = "junit:junit:${Versions.junit4}"
     static junit5 = "org.junit.jupiter:junit-jupiter-api:${Versions.junit5}"
     static junit5params = "org.junit.jupiter:junit-jupiter-params:${Versions.junit5}"
-    static assertj_core = "org.assertj:assertj-core:3.10.0"
+    static assertj_core = "org.assertj:assertj-core:3.11.1"
     static mockito = "org.mockito:mockito-core:${Versions.mockito}"
     static hamcrest = "org.hamcrest:hamcrest-all:${Versions.hamcrest}"
     static powermock = "org.powermock:powermock-module-junit4:${Versions.powermock}"
@@ -116,6 +116,7 @@ class Resolver {
                 // commons
                 Libraries.commons_lang3,
                 Libraries.commons_io,
+                Libraries.commons_coll4,
                 Libraries.junit4,
                 "org.junit.platform:junit-platform-commons:1.2.0",
                 "org.opentest4j:opentest4j:1.1.0",

@@ -80,7 +80,7 @@ class VarValueDefReader {
             throw new IllegalStateException("Fields must be enum, boolean or define values using @Var(value=...)");
         }
 
-        final Set<String> collectedValues = new HashSet<>();
+        final Set<Object> collectedValues = new HashSet<>();
         final List<VarValueDef> result = new ArrayList<>();
         for (final VarValueDef varValueDef : getVarValueDefsFromAnnotation(varAnnotation, conditions, includeNull)) {
             result.add(varValueDef);
