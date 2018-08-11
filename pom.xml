@@ -291,6 +291,7 @@
 
   <modules>
     <module>beanfiller-tcases</module>
+    <module>samples/list-sample</module>
     <module>samples</module>
     <module>samples/find-sample</module>
     <module>samples/testng-sample</module>

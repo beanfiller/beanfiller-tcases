@@ -30,6 +30,8 @@ interface Versions {
     static mockito = '2.23.4'
     static powermock = '1.7.4'
     static hamcrest = '1.3'
+
+    static jackson = '2.9.6'
 }
 
 
@@ -48,6 +50,9 @@ interface Libraries {
     static jcl_over_slf4j = "org.slf4j:jcl-over-slf4j:${Versions.slf4j}"
     static log4j_over_slf4j = "org.slf4j:log4j-over-slf4j:${Versions.slf4j}"
     static logback = "ch.qos.logback:logback-classic:${Versions.logback}"
+
+    static jackson_databind = "com.fasterxml.jackson.core:jackson-databind:${Versions.jackson}"
+    static jackson_core = "com.fasterxml.jackson.core:jackson-core:${Versions.jackson}"
 
     // test dependencies
     static junit4 = "junit:junit:${Versions.junit4}"

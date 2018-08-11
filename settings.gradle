@@ -1,7 +1,7 @@
 rootProject.name = 'beanfiller-tcases'
 
 include 'beanfiller-tcases'
-['samples':  ['find-sample', 'testng-sample']].each( {folder, subprojects ->
+['samples':  ['find-sample', 'testng-sample', 'list-sample']].each( {folder, subprojects ->
     subprojects.each({subproject ->
         include(subproject)
         project(':' + subproject).projectDir = file(folder + '/'+ subproject)
