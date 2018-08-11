@@ -25,6 +25,7 @@ import org.cornutum.tcases.VarValueDef;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static io.github.beanfiller.annotation.internal.reader.VarValueDefReader.readVarValueDefs;
@@ -427,6 +428,77 @@ public class VarValueDefReaderTest {
         }
     }
 
+
+    @Test
+    public void testReadVarValueDefsGenerator() throws Exception {
+        final Class<GeneratorSamples> fieldSamplesClass = GeneratorSamples.class;
+
+        final List<VarValueDef> defs = getVarValueDefs("extras", fieldSamplesClass, (String) null);
+        assertThat(defs).hasSize(2);
+        assertThat(defs.get(0).getType()).isEqualTo(VarValueDef.Type.FAILURE);
+        assertThat(defs.get(0).getName()).isEqualTo("foo1");
+        assertThat(defs.get(1).getType()).isEqualTo(VarValueDef.Type.VALID);
+        assertThat(defs.get(1).getName()).isEqualTo("foo2");
+
+
+        assertThatThrownBy(() -> getVarValueDefs("invalidArgs", fieldSamplesClass, (String) null))
+                .isInstanceOf(IllegalStateException.class)
+                .hasRootCauseInstanceOf(NoSuchMethodException.class);
+
+        assertThatThrownBy(() -> getVarValueDefs("invalidNonStatic", fieldSamplesClass, (String) null))
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThatThrownBy(() -> getVarValueDefs("invalidNonCollection", fieldSamplesClass, (String) null))
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThatThrownBy(() -> getVarValueDefs("invalidDuplicate", fieldSamplesClass, (String) null))
+                .isInstanceOf(IllegalStateException.class);
+
+    }
+
+    private static class GeneratorSamples {
+
+        private static List<VarValueDef> extras() {
+            return Arrays.asList(
+                    new VarValueDef("foo1", VarValueDef.Type.FAILURE),
+                    new VarValueDef("foo2", VarValueDef.Type.VALID));
+        }
+
+        @Var(generator = "extras", nullable = false)
+        public String[] extras;
+
+        private static List<VarValueDef> invalidArgs(String arg) {
+            return Collections.singletonList(
+                    new VarValueDef("foo1"));
+        }
+
+        @Var(generator = "invalidArgs", nullable = false)
+        public String[] invalidArgs;
+
+        private List<VarValueDef> invalidNonStatic() {
+            return Collections.singletonList(
+                    new VarValueDef("foo1"));
+        }
+
+        @Var(generator = "invalidNonStatic", nullable = false)
+        public String[] invalidNonStatic;
+
+        private static VarValueDef invalidNonCollection() {
+            return new VarValueDef("foo1");
+        }
+
+        @Var(generator = "invalidNonCollection", nullable = false)
+        public String[] invalidNonCollection;
+
+        private static List<VarValueDef> invalidDuplicate() {
+            return Arrays.asList(
+                    new VarValueDef("foo1"),
+                    new VarValueDef("foo1"));
+        }
+
+        @Var(generator = "invalidDuplicate", nullable = false)
+        public String[] invalidDuplicate;
+    }
 
     private List<VarValueDef> getVarValueDefs(String name, Class<?> fieldSamplesClass1, String... conditions) throws NoSuchFieldException {
         return readVarValueDefs(FieldWrapper.of(fieldSamplesClass1.getDeclaredField(name)), conditions);

@@ -51,6 +51,9 @@ class BooleanFieldReader {
         final Set<String> excludes = new HashSet<>();
         if (varAnnotation != null) {
             excludes.addAll(Arrays.asList(varAnnotation.exclude()));
+            if (!varAnnotation.generator().isEmpty()) {
+                throw new IllegalStateException("Boolean vars do not support generator");
+            }
         }
 
         final List<VarValueDef> varValues = new ArrayList<>();

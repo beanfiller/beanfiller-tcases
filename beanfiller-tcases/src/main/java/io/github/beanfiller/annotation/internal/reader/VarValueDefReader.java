@@ -21,7 +21,11 @@ import org.cornutum.tcases.VarValueDef;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +34,7 @@ import static io.github.beanfiller.annotation.internal.reader.BooleanFieldReader
 import static io.github.beanfiller.annotation.internal.reader.EnumFieldReader.readVarValueDefsForEnumField;
 import static io.github.beanfiller.annotation.internal.reader.ValueUtil.createNullVarValueDef;
 import static io.github.beanfiller.annotation.internal.reader.ValueUtil.createVarValueDef;
+import static java.util.Collections.emptyList;
 
 /**
  * Given a Java Bean classes annotated with Tcases annotations, created an IVarDef
@@ -55,9 +60,9 @@ class VarValueDefReader {
                 varValueDefs = readVarValueDefsForEnumField((Class<? extends Enum<?>>) field.getType(), varAnnotation, conditions);
             } else {
                 if (field.getType().isPrimitive()) {
-                    varValueDefs = getVarValuesNumbersStringPrimitive(varAnnotation, conditions, false);
+                    varValueDefs = getVarValuesNumbersStringPrimitive(field, varAnnotation, conditions, false);
                 } else {
-                    varValueDefs = getVarValuesNumbersStringPrimitive(varAnnotation, conditions, ((varAnnotation == null) || varAnnotation.nullable()));
+                    varValueDefs = getVarValuesNumbersStringPrimitive(field, varAnnotation, conditions, ((varAnnotation == null) || varAnnotation.nullable()));
                 }
             }
         } catch (IllegalStateException e) {
@@ -69,6 +74,7 @@ class VarValueDefReader {
 
     @Nonnull
     private static List<VarValueDef> getVarValuesNumbersStringPrimitive(
+            @Nonnull final FieldWrapper field,
             @Nullable final Var varAnnotation,
             @Nullable final String[] conditions,
             final boolean includeNull) {
@@ -76,7 +82,7 @@ class VarValueDefReader {
             // TODO: When allowing generators, allow exclusions
             throw new IllegalStateException("Only Boolean and Enum type Vars can exclude values");
         }
-        if ((varAnnotation == null) || (varAnnotation.value().length <= 0)) {
+        if ((varAnnotation == null) || ((varAnnotation.value().length <= 0) && varAnnotation.generator().isEmpty())) {
             throw new IllegalStateException("Fields must be enum, boolean or define values using @Var(value=...)");
         }
 
@@ -88,11 +94,44 @@ class VarValueDefReader {
                 throw new IllegalStateException("@Value value '" + varValueDef.getName() + "' duplicate");
             }
         }
+        for (final VarValueDef varValueDef : getVarValueDefsFromGenerator(field, varAnnotation.generator())) {
+            // TODO: Add conditions
+            result.add(varValueDef);
+            if (!collectedValues.add(varValueDef.getName())) {
+                throw new IllegalStateException("@Value value '" + varValueDef.getName() + "' duplicate");
+            }
+        }
 
 
         return result;
     }
 
+    @SuppressWarnings("unchecked")
+    private static Collection<VarValueDef> getVarValueDefsFromGenerator(
+            @Nonnull final FieldWrapper field,
+            @Nonnull final String generator) {
+        if (generator.isEmpty()) {
+            return emptyList();
+        }
+        final Method method;
+        try {
+            method = field.getDeclaringClass().getDeclaredMethod(generator);
+            if (!Modifier.isStatic(method.getModifiers())) {
+                throw new IllegalStateException("Generator methods must be static");
+            }
+            if (!Collection.class.isAssignableFrom(method.getReturnType())) {
+                throw new IllegalStateException("Generator methods must return Collection<VarValueDef>");
+            }
+        } catch (final NoSuchMethodException e) {
+            throw new IllegalStateException("Cannot find method '" + generator + "' on " + field.getDeclaringClass(), e);
+        }
+        method.setAccessible(true);
+        try {
+            return (Collection<VarValueDef>) method.invoke(null);
+        } catch (final IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Error when calling generator method " + generator, e);
+        }
+    }
 
     private static List<VarValueDef> getVarValueDefsFromAnnotation(
             final Var varAnnotation,

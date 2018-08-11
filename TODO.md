@@ -6,7 +6,6 @@ My list of ideas to implement... pull requests welcome.
   * Design: Handle quotes and special chars in String values
   * Feature: Allow annotating enum values for varvalue defaults
   * Feature: properly support bean getters/setters (Consider Jackson-databind?)
-  * Design: Value generator method reference for vars with many values.
   * Feature: Consider Var ranges for numbers, times, dates, ...?
   * Design: Generator configuration inside FunctionInputDef (In particular for Combine)?
     * Design: Generator Combiners from input def
@@ -43,8 +42,6 @@ My list of ideas to implement... pull requests welcome.
     * ATM withdraw
     * Restassured/spring? example
     * JSoup Spring Thymeleaf example
-  * Design: Generator configuration inside FunctionInputDef (In particular for Combine)?
-    * Design: Generator Combiners from input def
   * Design: More reusable BoundaryValueCategory enums
   * Feature: Use beanfillers-annotations without tcases on the compile classpath
   * Design: custom VarDef / VarSet subclasses for reflection access?

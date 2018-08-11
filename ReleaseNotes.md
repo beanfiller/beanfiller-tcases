@@ -1,5 +1,8 @@
 # Changelod
 
+## 0.0.2-SNAPSHOT
+
+* generator ref: reference method that provides values for variable
 
 ## 0.0.1
 

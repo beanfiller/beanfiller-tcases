@@ -34,6 +34,8 @@ public @interface Var {
      */
     Value[] value() default {};
 
+    String generator() default "";
+
     String tag() default "arg"; // Input type from docs, TODO: not sure what to do with it
 
     String[] when() default {};

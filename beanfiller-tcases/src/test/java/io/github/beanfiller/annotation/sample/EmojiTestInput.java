@@ -15,16 +15,30 @@ limitations under the License.
 
 package io.github.beanfiller.annotation.sample;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.beanfiller.annotation.annotations.Value;
 import io.github.beanfiller.annotation.annotations.Var;
 import io.github.beanfiller.annotation.creator.FunctionTestsCreator;
+import org.cornutum.tcases.VarValueDef;
+import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
 public class EmojiTestInput {
 
-    @Var(value = {@Value("^"), @Value("°"), @Value("ಠ"), @Value("≖"), @Value("•"), @Value("ˇ"),
-            @Value("˘"), @Value("ᴗ"), @Value("\""), @Value("<"), @Value("╥")})
+    @SuppressFBWarnings("RE_POSSIBLE_UNINTENDED_PATTERN")
+    private static List<VarValueDef> eyeValues() {
+        return Arrays.stream("^°ಠ≖•ˇ˘ᴗ\"<╥".split("|"))
+                .map(c -> new VarValueDef(c, VarValueDef.Type.VALID))
+                .collect(Collectors.toList());
+    }
+
+    @Var(generator = "eyeValues")
     char eye;
 
     @Var(value = {@Value("-"), @Value("_"), @Value("‿"), @Value("∇"), @Value("◡"), @Value("³"),
@@ -40,11 +54,13 @@ public class EmojiTestInput {
                 + (arms == null ? "" : arms.substring(1, 2));
     }
 
-    public static void main(String[] args) {
-        int tupleSize = 1;
-        List<EmojiTestInput> testCases = new FunctionTestsCreator<>(EmojiTestInput.class)
+    @Test
+    public void testTupleSize() {
+        final int tupleSize = 2;
+        final List<EmojiTestInput> testCases = new FunctionTestsCreator<>(EmojiTestInput.class)
                 .tupleGenerator(tupleSize)
                 .createDefs();
+        assertThat(testCases.size()).isGreaterThan(100);
         testCases.forEach(test -> System.out.println(test.getFace()));
 
         System.out.println("\n" + testCases.size() + " faces generated with independent " + tupleSize + "-tuples or properties");
