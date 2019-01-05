@@ -3,7 +3,6 @@
 My list of ideas to implement... pull requests welcome.
 
 * For 0.0.2 Release
-  * Design: Handle quotes and special chars in String values
   * Feature: Allow annotating enum values for varvalue defaults
   * Feature: properly support bean getters/setters (Consider Jackson-databind?)
   * Feature: Consider Var ranges for numbers, times, dates, ...?

@@ -15,17 +15,21 @@ limitations under the License.
 
 package io.github.beanfiller.annotation.sample;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import io.github.beanfiller.annotation.annotations.Value;
 import io.github.beanfiller.annotation.annotations.Var;
 import io.github.beanfiller.annotation.creator.AbstractTestInput;
-import io.github.beanfiller.annotation.util.CustomToStringStyle;
+import io.github.beanfiller.annotation.creator.FunctionTestsCreator;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.beanfiller.annotation.sample.TriangleProblemTestInput.TriangleCategory.DEGENERATE;
 import static io.github.beanfiller.annotation.sample.TriangleProblemTestInput.TriangleCategory.EQUILATERAL;
 import static io.github.beanfiller.annotation.sample.TriangleProblemTestInput.TriangleCategory.INVALID;
 import static io.github.beanfiller.annotation.sample.TriangleProblemTestInput.TriangleCategory.ISOSCELES;
 import static io.github.beanfiller.annotation.sample.TriangleProblemTestInput.TriangleCategory.SCALENE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.cornutum.tcases.TestCase.Type.FAILURE;
 
 public class TriangleProblemTestInput extends AbstractTestInput {
@@ -36,43 +40,134 @@ public class TriangleProblemTestInput extends AbstractTestInput {
     private static final String FIRST_ZERO = "FIRST_ZERO";
     private static final String SECOND_ZERO = "SECOND_ZERO";
     private static final String SECOND_NEGATIVE = "SECOND_NEGATIVE";
+
     @Var(value = {
             @Value(value = "NEGATIVE", type = FAILURE),
-            @Value(value = "ZERO", properties = FIRST_ZERO, once = true)
-    })
-    FirstSegmentLength a;
+            @Value(value = "ZERO", type = FAILURE, properties = FIRST_ZERO, once = true)
+    }, nullable = false)
+    FirstSegmentLength aCase;
+
     @Var(value = {
             @Value(value = "NEGATIVE", type = FAILURE, properties = SECOND_NEGATIVE),
-            @Value(value = "ZERO", type = FAILURE, when = FIRST_ZERO),
-            @Value(value = "SAME_AS_FIRST", properties = SAME_LENGTH)
-    })
-    SecondSegmentLength b;
+            @Value(value = "ZERO", type = FAILURE, whenNot = FIRST_ZERO),
+            @Value(value = "SAME_AS_FIRST", properties = SAME_LENGTH, whenNot = FIRST_ZERO)
+    }, nullable = false)
+    SecondSegmentLength bCase;
+
     @Var(value = {
             @Value(value = "NEGATIVE", type = FAILURE),
             @Value(value = "TOO_SHORT", type = FAILURE),
             @Value(value = "DIFFERENCE_BETWEEN_FIRST_TWO", whenNot = {SAME_LENGTH, FIRST_ZERO, SECOND_ZERO}),
             @Value(value = "SAME_AS_SECOND", whenNot = {SECOND_ZERO, SECOND_NEGATIVE}),
-            @Value(value = "SHORTER_THAN_SECOND", whenNot = {SECOND_ZERO, SECOND_NEGATIVE})
-    })
-    ThirdSegmentLength c;
+            @Value(value = "SHORTER_THAN_SECOND", whenNot = {SECOND_ZERO, SECOND_NEGATIVE, FIRST_ZERO})
+    }, nullable = false)
+    ThirdSegmentLength cCase;
 
-    public static TriangleCategory classifyTriangle(double a, double b, double c) {
-        if (a <= 0 || b <= 0 || c <= 0) return INVALID; // added test
-        if (equal(a, b) && equal(b, c)) return EQUILATERAL;
-        if (equal(a, b + c) || equal(c, b + a) || equal(b, a + c)) return DEGENERATE;
-        if (a >= b + c || c >= b + a || b >= a + c) return INVALID;
-        if (equal(b, c) || equal(a, b) || equal(c, a)) return ISOSCELES;
-        return SCALENE;
+    private Triangle toTriangle() {
+        final double a;
+        switch (aCase) {
+            case NEGATIVE:
+                a = -1;
+                break;
+            case ZERO:
+                a = 0;
+                break;
+            default:
+            case POSITIVE:
+                a = 2;
+        }
+        final double b;
+        switch (bCase) {
+            case NEGATIVE:
+                b = -1;
+                break;
+            case ZERO:
+                b = 0;
+                break;
+            case SAME_AS_FIRST:
+                b = a;
+                break;
+            default:
+            case LARGER_THAN_FIRST:
+                b = 3;
+                break;
+        }
+        final double c;
+        switch (cCase) {
+            case NEGATIVE:
+                c = -1;
+                break;
+            case DIFFERENCE_BETWEEN_FIRST_TWO:
+                c = b - a;
+                break;
+            case SAME_AS_SECOND:
+                c = b;
+                break;
+            default:
+            case SHORTER_THAN_SECOND:
+                c = b - 0.5;
+                break;
+            case TOO_SHORT:
+                c = 0.1;
+                break;
+        }
+        return new Triangle(a, b, c);
     }
 
-    private static boolean equal(double a, double b) {
-        double c = a - b;
-        return Math.abs(c - 1.0) <= 0.000001;
+    private static class Triangle {
+        double a, b, c;
+
+        Triangle(double a, double b, double c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+
+        TriangleCategory classifyTriangle() {
+            if (a <= 0 || b <= 0 || c <= 0) return INVALID; // added test
+            if (equal(a, b) && equal(b, c)) return EQUILATERAL;
+            if (equal(a, b + c) || equal(c, b + a) || equal(b, a + c)) return DEGENERATE;
+            if (a >= b + c || c >= b + a || b >= a + c) return INVALID;
+            if (equal(b, c) || equal(a, b) || equal(c, a)) return ISOSCELES;
+            return SCALENE;
+        }
+
+        private static boolean equal(double a, double b) {
+            final double c = a - b;
+            return Math.abs(c) <= 0.000001;
+        }
+
+        @Override
+        public String toString() {
+            return "Triangle{"
+                    + "a=" + a
+                    + ", b=" + b
+                    + ", c=" + c
+                    + '}';
+        }
     }
+
+
 
     @Override
     public String toString() {
-        return ReflectionToStringBuilder.toString(this, CustomToStringStyle.INSTANCE);
+        return "TestInput" + getTestCaseId() + "{"
+                + "aCase=" + aCase
+                + ", bCase=" + bCase
+                + ", cCase=" + cCase
+                + '}' + (isFailure() ? "Error" : "");
+    }
+
+    @Test
+    public void testTupleSize() {
+        final int tupleSize = 2;
+        final List<TriangleProblemTestInput> testCases = new FunctionTestsCreator<>(TriangleProblemTestInput.class)
+                .tupleGenerator(tupleSize)
+                .createDefs();
+        testCases.forEach(test -> System.out.println(test.toString() + " " + test.toTriangle() + " " + test.toTriangle().classifyTriangle()));
+        assertThat(testCases.size()).isGreaterThan(9);
+        assertThat(testCases.stream().map(tcase -> tcase.toTriangle().classifyTriangle()).distinct().collect(Collectors.toList()))
+                .contains(TriangleCategory.values());
     }
 
     enum TriangleCategory {
